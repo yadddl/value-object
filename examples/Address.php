@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Yadddl\DDD\Examples;
+namespace Yadddl\ValueObject\Examples;
 
 use JetBrains\PhpStorm\Immutable;
 use JetBrains\PhpStorm\Pure;

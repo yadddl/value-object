@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Yadddl\DDD\Examples;
+namespace Yadddl\ValueObject\Examples;
 
-use Yadddl\DDD\Error\InvalidValueObject;
+use Yadddl\ValueObject\Error\InvalidValueObject;
 use JetBrains\PhpStorm\Pure;
 
 class Age

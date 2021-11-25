@@ -134,7 +134,7 @@ class ExampleController {
 Or, if you manage your errors with a middleware or a centralized exception handler, we can use the trait `FailableTrait`
 ```php
 
-use Yadddl\DDD\Error\FailableTrait;
+use Yadddl\ValueObject\Error\FailableTrait;
 
 class FullName  {
     use FailableTrait;

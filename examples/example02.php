@@ -2,11 +2,11 @@
 
 require_once (__DIR__ . '/../vendor/autoload.php');
 
-use Yadddl\DDD\Error\ValidationError;
-use Yadddl\DDD\Examples\Age;
-use Yadddl\DDD\Primitive\Text;
-use Yadddl\DDD\Serializer\SerializerBaseFactory;
-use function Yadddl\DDD\factory;
+use Yadddl\ValueObject\Error\ValidationError;
+use Yadddl\ValueObject\Examples\Age;
+use Yadddl\ValueObject\Primitive\Text;
+use Yadddl\ValueObject\Serializer\SerializerBaseFactory;
+use function Yadddl\ValueObject\factory;
 
 // Getting the base serializer (you can customize it, if you want)
 $serializer = SerializerBaseFactory::make();

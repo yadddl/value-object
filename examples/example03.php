@@ -2,8 +2,8 @@
 
 require_once (__DIR__ . '/../vendor/autoload.php');
 
-use Yadddl\DDD\Primitive\Text;
-use Yadddl\DDD\Serializer\SerializerBaseFactory;
+use Yadddl\ValueObject\Primitive\Text;
+use Yadddl\ValueObject\Serializer\SerializerBaseFactory;
 
 // Getting the base serializer (you can customize it, if you want)
 $serializer = SerializerBaseFactory::make();
@@ -32,8 +32,8 @@ class FullName  {
     public function getFirstName(): Name { return $this->firstName;}
     public function getLastName(): Name { return $this->lastName; }
 
-    public static function create(string|Name $firstName, string|Name $lastName): static|\Yadddl\DDD\Error\ValidationError {
-        return \Yadddl\DDD\factory (
+    public static function create(string|Name $firstName, string|Name $lastName): static|\Yadddl\ValueObject\Error\ValidationError {
+        return \Yadddl\ValueObject\factory (
             __CLASS__,
             Name::create($firstName),
             Name::create($lastName)

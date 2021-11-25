@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Yadddl\DDD;
 
-use Yadddl\DDD\Error\ValidationError;
+use Yadddl\ValueObject\Error\ValidationError;
 use ReflectionException;
 
 /**

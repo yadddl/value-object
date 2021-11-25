@@ -2,16 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Yadddl\DDD\Primitive;
+namespace Yadddl\ValueObject\Primitive;
 
-use Yadddl\DDD\Error\InvalidValueObject;
 use DateTimeImmutable;
 use DateTimeInterface;
+use Yadddl\ValueObject\Error\InvalidValueObject;
 use JetBrains\PhpStorm\Pure;
-use Stringable;
-use function sprintf;
 
-final class Time implements Stringable
+final class Time implements \Stringable
 {
     private const FORMAT = 'H:i:s';
 
@@ -28,9 +26,24 @@ final class Time implements Stringable
         $this->seconds = $seconds;
     }
 
+    public function getHours(): int
+    {
+        return $this->hours;
+    }
+
+    public function getMinutes(): int
+    {
+        return $this->minutes;
+    }
+
+    public function getSeconds(): int
+    {
+        return $this->seconds;
+    }
+
     #[Pure] private static function toString(int $hours, int $minutes, int $seconds): string
     {
-        return sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
+        return \sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
     }
 
     #[Pure] public function __toString(): string
@@ -45,6 +58,24 @@ final class Time implements Stringable
         $seconds = (int)$date->format('s');
 
         return new Time($hours, $minutes, $seconds);
+    }
+
+    public static function fromString(string $time): Time|InvalidValueObject
+    {
+        if (!preg_match('/^([0-1]?[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$/', $time, $matches)) {
+            return new InvalidValueObject('invalid time', "Invalid time provided: '{$time}'");
+        }
+
+        [, $hours, $minutes, $seconds] = $matches;
+
+        return new Time((int)$hours, (int)$minutes, (int)$seconds);
+    }
+
+    private static function timeIsValid(int $hours, int $minutes, int $seconds): bool
+    {
+        return ($hours >= 0 && $hours <= 23)
+            && ($minutes >= 0 && $minutes <= 59)
+            && ($seconds >= 0 && $seconds <= 59);
     }
 
     #[Pure] public function toInt(): int

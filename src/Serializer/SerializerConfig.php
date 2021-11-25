@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Yadddl\DDD\Serializer;
+namespace Yadddl\ValueObject\Serializer;
 
 class SerializerConfig
 {

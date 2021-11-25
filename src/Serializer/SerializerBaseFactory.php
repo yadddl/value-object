@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Yadddl\DDD\Serializer;
+namespace Yadddl\ValueObject\Serializer;
 
-use Yadddl\DDD\Primitive\DateTime;
-use Yadddl\DDD\Primitive\Integer;
+use Yadddl\ValueObject\Primitive\DateTime;
+use Yadddl\ValueObject\Primitive\Integer;
 
 final class SerializerBaseFactory implements SerializerFactory
 {

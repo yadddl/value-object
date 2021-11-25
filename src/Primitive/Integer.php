@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Yadddl\DDD\Primitive;
+namespace Yadddl\ValueObject\Primitive;
 
-use Yadddl\DDD\Error\IntegerTooBig;
-use Yadddl\DDD\Error\IntegerTooSmall;
-use Yadddl\DDD\Error\InvalidValueObject;
+use Yadddl\ValueObject\Error\IntegerTooBig;
+use Yadddl\ValueObject\Error\IntegerTooSmall;
+use Yadddl\ValueObject\Error\InvalidValueObject;
 use Stringable;
 use const PHP_INT_MAX;
 use const PHP_INT_MIN;

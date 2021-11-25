@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Yadddl\DDD\Primitive;
+namespace Yadddl\ValueObject\Primitive;
 
-use Yadddl\DDD\Error\InvalidValueObject;
-use Yadddl\DDD\Serializer\SerializerBaseFactory;
+use Yadddl\ValueObject\Error\InvalidValueObject;
+use Yadddl\ValueObject\Serializer\SerializerBaseFactory;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \Yadddl\DDD\Primitive\PositiveInteger
+ * @covers \Yadddl\ValueObject\Primitive\PositiveInteger
  */
 class PositiveIntegerTest extends TestCase
 {

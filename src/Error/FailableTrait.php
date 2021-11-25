@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Yadddl\DDD\Error;
+namespace Yadddl\ValueObject\Error;
 
 trait FailableTrait
 {

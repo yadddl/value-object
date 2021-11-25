@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Yadddl\DDD\Serializer;
+namespace Yadddl\ValueObject\Serializer;
 
 final class Identity implements Serializer
 {
-    public function serialize(mixed $value): mixed
+    public function serialize(mixed $object): mixed
     {
-        return $value;
+        return $object;
     }
 }

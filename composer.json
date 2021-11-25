@@ -22,7 +22,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Yadddl\\DDD\\": "src/"
+      "Yadddl\\ValueObject\\": "src/"
     },
     "files": [
       "src/helpers.php"
@@ -30,8 +30,8 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "Yadddl\\DDD\\": "tests/",
-      "Yadddl\\DDD\\Examples\\": "examples/"
+      "Yadddl\\ValueObject\\": "tests/",
+      "Yadddl\\ValueObject\\Examples\\": "examples/"
     }
   },
   "scripts": {

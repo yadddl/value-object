@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Yadddl\DDD;
 
-use Yadddl\DDD\Error\FieldError;
-use Yadddl\DDD\Error\InvalidValueObject;
-use Yadddl\DDD\Error\ValidationError;
+use Yadddl\ValueObject\Error\FieldError;
+use Yadddl\ValueObject\Error\InvalidValueObject;
+use Yadddl\ValueObject\Error\ValidationError;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;

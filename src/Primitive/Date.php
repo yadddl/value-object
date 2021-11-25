@@ -2,16 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Yadddl\DDD\Primitive;
+namespace Yadddl\ValueObject\Primitive;
 
-use Yadddl\DDD\Error\InvalidValueObject;
 use DateTimeImmutable;
 use DateTimeInterface;
+use Yadddl\ValueObject\Error\InvalidValueObject;
 use JetBrains\PhpStorm\Pure;
-use Stringable;
-use function sprintf;
 
-final class Date implements Stringable
+final class Date implements \Stringable
 {
     private const FORMAT = 'Y-m-d';
 
@@ -28,6 +26,21 @@ final class Date implements Stringable
         $this->years = $years;
     }
 
+    public function getDays(): int
+    {
+        return $this->days;
+    }
+
+    public function getMonths(): int
+    {
+        return $this->months;
+    }
+
+    public function getYears(): int
+    {
+        return $this->years;
+    }
+
     public static function now(): Date
     {
         return self::createFromDateTimeInterface(new DateTimeImmutable());
@@ -38,7 +51,7 @@ final class Date implements Stringable
      */
     protected static function toString(int $years, int $months, int $days): string
     {
-        return sprintf('%4d-%02d-%02d', $years, $months, $days);
+        return \sprintf('%4d-%02d-%02d', $years, $months, $days);
     }
 
     #[Pure] public function __toString(): string
@@ -46,16 +59,33 @@ final class Date implements Stringable
         return self::toString($this->years, $this->months, $this->days);
     }
 
-    public function toDateTimeImmutable(): DateTimeImmutable|false
+    /**
+     * @see toDateTimeImmutable
+     */
+    public function toDateTimeInterface(): DateTimeInterface
+    {
+        return $this->toDateTimeImmutable();
+    }
+
+    public function toDateTimeImmutable(): DateTimeImmutable
     {
         $dateAsString = "{$this}T00:00:00Z";
 
-        return DateTimeImmutable::createFromFormat(DateTimeInterface::RFC3339, $dateAsString);
+        $result = DateTimeImmutable::createFromFormat(DateTimeInterface::RFC3339, $dateAsString);
+
+        assert($result !== false);
+
+        return $result;
     }
 
     #[Pure] public function toInt(): int
     {
         return (int)sprintf('%04d%02d%02d000000', $this->years, $this->months, $this->days);
+    }
+
+    public function format(string $format): string
+    {
+        return $this->toDateTimeImmutable()->format($format);
     }
 
     public static function createFromDateTimeInterface(DateTimeInterface $date): Date
@@ -94,6 +124,19 @@ final class Date implements Stringable
         }
 
         return new Date($days, $months, $years);
+    }
+
+    public static function create(string|self|DateTimeInterface $value): Date|InvalidValueObject
+    {
+        if ($value instanceof self) {
+            return self::createFrom($value->days, $value->months, $value->years);
+        }
+
+        if ($value instanceof DateTimeInterface) {
+            return self::createFromDateTimeInterface($value);
+        }
+
+        return self::createFromString($value);
     }
 
     #[Pure] public function equalsTo(Date $date): bool

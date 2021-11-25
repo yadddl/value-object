@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Yadddl\DDD\Examples;
+namespace Yadddl\ValueObject\Examples;
 
-use Yadddl\DDD\Error\ValidationError;
+use Yadddl\ValueObject\Error\ValidationError;
 use ReflectionException;
-use function Yadddl\DDD\factory;
+use function Yadddl\ValueObject\factory;
 
 final class Person
 {

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Yadddl\DDD\Primitive;
+namespace Yadddl\ValueObject\Primitive;
 
-use Yadddl\DDD\Error\InvalidString;
-use Yadddl\DDD\Error\InvalidValueObject;
+use Yadddl\ValueObject\Error\InvalidString;
+use Yadddl\ValueObject\Error\InvalidValueObject;
 use JetBrains\PhpStorm\Pure;
 use Stringable;
 use function preg_match;

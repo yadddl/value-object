@@ -3,8 +3,8 @@
 # Create a simple value object
 
 ```php
-use Yadddl\DDD\Primitive\Text;
-use Yadddl\DDD\Serializer\SerializerBaseFactory;
+use Yadddl\ValueObject\Primitive\Text;
+use Yadddl\ValueObject\Serializer\SerializerBaseFactory;
 
 // Getting the base serializer (you can customize it, if you want)
 $serializer = SerializerBaseFactory::make();
