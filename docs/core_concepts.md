@@ -12,9 +12,9 @@
 
 ## Value Objects
 The Value object is one of the basic concepts of the DDD.
-They provide a safe way to define special types inside your code.
+It provides a safe way to define special types inside your code.
 
-## Why I should use them?
+## Why should I use them?
 Let's think about correctness of the data inside your application.
 
 ```
