@@ -148,7 +148,7 @@ class ExampleController {
     public function __invoke (Request $request): Response {
         $data = $request->json();
 
-        $fullName = FullName::create(...$data, true)->orFail(); // Raise an exception if fail
+        $fullName = FullName::create(...$data)->orFail(); // Raise an exception if fail
         
         // DO stuff
       
