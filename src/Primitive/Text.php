@@ -16,6 +16,8 @@ class Text implements Stringable
 
     protected string $regex = '/(.+)/';
 
+    protected string|null $errorMessage = null;
+
     final public function __construct(string $value)
     {
         $this->validate($value);
@@ -31,7 +33,9 @@ class Text implements Stringable
     private function validate(string $value): void
     {
         if (preg_match($this->regex, $value) !== 1) {
-            throw new InvalidString($this->regex, $value);
+            $message = $this->errorMessage ?? "Invalid string: '{$value}' does not match with '{$this->regex}'";
+
+            throw new InvalidString($message);
         }
     }
 
@@ -49,8 +53,13 @@ class Text implements Stringable
         return $this->value === $value->value;
     }
 
-    public function toUpper(): static
+    public function toUpperCase(): static
     {
         return new static(strtoupper($this->value));
+    }
+
+    public function toLowerCase(): static
+    {
+        return new static(strtolower($this->value));
     }
 }

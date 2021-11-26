@@ -2,6 +2,7 @@
 
 # Serializer
 
+## Basic usage
 The simplest way to retrieve the serializer is this.
 
 ```php
@@ -19,3 +20,7 @@ $person = Person::create(...$data);
 $serializedData = $serializer->serialize($person);
 ```
 With `$serializedData` that is the same of `$data`.
+
+## Custom configuration
+
+## Serializers overriding

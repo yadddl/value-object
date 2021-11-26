@@ -19,3 +19,4 @@ It doesn't cover all the possibile use cases, then use it if you want, or contri
 - [Getting Started](docs/getting_started.md)
 - [Create your own value object](docs/create_your_own_value_object.md)
 - [Serializer](docs/serializer.md)
+- [Primitives](docs/primitives.md)
