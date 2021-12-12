@@ -17,10 +17,10 @@ It provides a safe way to define special types inside your code.
 ## Why should I use them?
 Let's think about correctness of the data inside your application.
 
-```
+```php
 function doStuff(int $age): void {
    if ($age >= 18) {
-       /// Do stuff
+      // Do stuff
    }
    else {
       // Throws an exception?
@@ -30,7 +30,7 @@ function doStuff(int $age): void {
 In this example, we have `$age`  and we have to validate every time, for every function that use that value.
 With a Value Object approach, we have to validate just once, when we instantiate it, and then we are sure that the value is right, always.
 
-```
+```php
 function doStuff(Age $age): void {
    // Do stuff
 }
@@ -42,7 +42,7 @@ Of course, `Age` is not something generic, but it should follow the rules of our
 
 - Constructor should be private, and a factory method (ex. `create` or `make`) must be provided.
 
-- For an easy debug, a `Stringable` interface should be implemented
+- For an easy debug, a `Stringable` interface should be implemented.
 
 - Value objects **MUST BE** always valid. Cannot exists a Value Object with an invalid state.
 
