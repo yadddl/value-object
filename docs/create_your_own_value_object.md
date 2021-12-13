@@ -47,9 +47,9 @@ $fullName = new FullName (
 );
 ```
 
-That's seems pretty decent, but if we want to hydrate the object, we had to do it manually, field by field. 
+That's seems pretty decent, but if we want to hydrate the object, we had to do it manually, field by field.
 
-Also, it's difficult to catch the errors and the code will crash while running cause a type error will rise. 
+Also, it's difficult to catch the errors and the code will crash while running cause a type error will be raised.
 
 We need a better solution, like a factory method.
 
