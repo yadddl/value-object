@@ -7,7 +7,6 @@ namespace Yadddl\ValueObject\Primitive;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Yadddl\ValueObject\Error\InvalidValueObject;
-use Yadddl\ValueObject\Error\ValidationError;
 
 /**
  * @covers \Yadddl\ValueObject\Primitive\Text
@@ -18,10 +17,14 @@ class TextTest extends TestCase
     {
         $text = Text::create("Pippo");
 
+        Assert::assertInstanceOf(Text::class, $text);
         Assert::assertSame('Pippo', (string)$text);
         Assert::assertSame('PIPPO', (string)$text->toUpperCase());
         Assert::assertSame('pippo', (string)$text->toLowerCase());
-        Assert::assertTrue($text->equalsTo(Text::create('Pippo')));
+
+        $text2 = Text::create('Pippo');
+        Assert::assertInstanceOf(Text::class, $text2);
+        Assert::assertTrue($text->equalsTo($text2));
     }
 
     public function testExtension(): void

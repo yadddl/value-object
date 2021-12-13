@@ -33,6 +33,7 @@ class Text implements Stringable
     private function validate(string $value): void
     {
         if (preg_match($this->regex, $value) !== 1) {
+            /** @psalm-var non-empty-string $message */
             $message = $this->errorMessage ?? "Invalid string: '{$value}' does not match with '{$this->regex}'";
 
             throw new InvalidString($message);
