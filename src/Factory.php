@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Yadddl\DDD;
+namespace Yadddl\ValueObject;
 
 use Yadddl\ValueObject\Error\FieldError;
 use Yadddl\ValueObject\Error\InvalidValueObject;

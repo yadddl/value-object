@@ -41,30 +41,9 @@ final class Date implements \Stringable
         return $this->years;
     }
 
-    public static function now(): Date
-    {
-        return self::createFromDateTimeInterface(new DateTimeImmutable());
-    }
-
-    /**
-     * @psalm-pure
-     */
-    protected static function toString(int $years, int $months, int $days): string
-    {
-        return \sprintf('%4d-%02d-%02d', $years, $months, $days);
-    }
-
     #[Pure] public function __toString(): string
     {
         return self::toString($this->years, $this->months, $this->days);
-    }
-
-    /**
-     * @see toDateTimeImmutable
-     */
-    public function toDateTimeInterface(): DateTimeInterface
-    {
-        return $this->toDateTimeImmutable();
     }
 
     public function toDateTimeImmutable(): DateTimeImmutable
@@ -86,6 +65,19 @@ final class Date implements \Stringable
     public function format(string $format): string
     {
         return $this->toDateTimeImmutable()->format($format);
+    }
+
+    /**
+     * @psalm-pure
+     */
+    protected static function toString(int $years, int $months, int $days): string
+    {
+        return \sprintf('%4d-%02d-%02d', $years, $months, $days);
+    }
+
+    public static function now(): Date
+    {
+        return self::createFromDateTimeInterface(new DateTimeImmutable());
     }
 
     public static function createFromDateTimeInterface(DateTimeInterface $date): Date
