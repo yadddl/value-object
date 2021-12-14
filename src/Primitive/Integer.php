@@ -36,6 +36,12 @@ class Integer implements Stringable
         $this->value = $value;
     }
 
+    public function equalsTo(mixed $integer): bool
+    {
+        return $integer instanceof static
+            && $integer->value === $this->value;
+    }
+
     public function __toString(): string
     {
         return (string)$this->value;

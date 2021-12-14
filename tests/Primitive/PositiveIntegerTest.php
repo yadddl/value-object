@@ -29,15 +29,4 @@ class PositiveIntegerTest extends TestCase
         Assert::assertSame('integer too small', $error->getType());
         Assert::assertSame( 'The value -20 is too small. Minimum 0', $error->getMessage());
     }
-
-    public function testSerialization(): void
-    {
-        $serializer = SerializerBaseFactory::make();
-
-        $positive = PositiveInteger::create(10);
-
-        $value = $serializer->serialize($positive);
-
-        Assert::assertSame(10, $value);
-    }
 }
