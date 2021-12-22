@@ -21,7 +21,9 @@ final class Factory
     /** @var class-string<T> $target */
     private string $target;
 
+    /** @var ReflectionClass<T> */
     private ReflectionClass $reflectionClass;
+
     private ?ReflectionMethod $constructor;
 
     /**
@@ -37,7 +39,7 @@ final class Factory
     }
 
     /**
-     * @param array $args
+     * @param array<mixed> $args
      *
      * @return T
      *
@@ -45,7 +47,6 @@ final class Factory
      */
     protected function newInstance(array $args): object
     {
-        /** @var T */
         $instance = $this->reflectionClass->newInstanceWithoutConstructor();
 
         if ($this->constructor) {
@@ -89,12 +90,11 @@ final class Factory
             /** @var mixed */
             $argument = $args[$index];
 
-            if (is_object($argument)) {
-                match (get_class($argument)) {
-                    InvalidValueObject::class => $errors->addError(new FieldError($parameter, $argument)),
-                    ValidationError::class => $errors->merge($parameter, $argument)
-                };
-            }
+            match (true) {
+                $argument instanceof InvalidValueObject => $errors->addError(new FieldError($parameter, $argument)),
+                $argument instanceof ValidationError => $errors->merge($parameter, $argument),
+                default => null,
+            };
         }
 
         if ($errors->hasErrors()) {

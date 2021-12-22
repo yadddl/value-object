@@ -45,6 +45,9 @@ class ValidationError extends ValueError
         }
     }
 
+    /**
+     * @return array{class : string, fields : array<string, string>}
+     */
     #[Pure] public function getInvalidFields(): array
     {
         $invalidFields = [];
