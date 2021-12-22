@@ -1,3 +1,5 @@
+[![GitHub workflow](https://github.com/yadddl/value-object/actions/workflows/php.yml/badge.svg)](https://github.com/yadddl/value-object/actions/workflows/php.yml)
+
 # Yet Another DDD Library
 ## Value object
 
