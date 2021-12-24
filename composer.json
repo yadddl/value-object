@@ -17,7 +17,8 @@
     "vimeo/psalm": "^4.0",
     "friendsofphp/php-cs-fixer": "^3.0",
     "psalm/plugin-phpunit": "^0.16",
-    "jetbrains/phpstorm-attributes": "^1.0"
+    "jetbrains/phpstorm-attributes": "^1.0",
+    "phpstan/phpstan": "^1.2"
   },
   "autoload": {
     "psr-4": {
@@ -39,11 +40,13 @@
   "scripts": {
     "test": "phpunit",
     "test-with-coverage": "phpunit --coverage-clover clover.xml ",
+    "phpstan": "phpstan",
     "psalm": "psalm",
     "cs-check": "php-cs-fixer fix --dry-run --diff src/",
     "cs-fix": "php-cs-fixer fix --diff src/",
     "test:all": [
       "@cs-check",
+      "@phpstan",
       "@psalm",
       "@test"
     ]

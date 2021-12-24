@@ -11,8 +11,6 @@ use JetBrains\PhpStorm\Pure;
 
 final class Time implements \Stringable
 {
-    private const FORMAT = 'H:i:s';
-
     private int $hours;
 
     private int $minutes;
@@ -69,13 +67,6 @@ final class Time implements \Stringable
         [, $hours, $minutes, $seconds] = $matches;
 
         return new Time((int)$hours, (int)$minutes, (int)$seconds);
-    }
-
-    private static function timeIsValid(int $hours, int $minutes, int $seconds): bool
-    {
-        return ($hours >= 0 && $hours <= 23)
-            && ($minutes >= 0 && $minutes <= 59)
-            && ($seconds >= 0 && $seconds <= 59);
     }
 
     #[Pure] public function toInt(): int
