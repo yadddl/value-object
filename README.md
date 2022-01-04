@@ -12,7 +12,7 @@ It doesn't cover all the possibile use cases, then use it if you want, or contri
 ## Usage
 > Requires PHP 8
 
-    composer require yadddl/value-objec
+    composer require yadddl/value-object
 > NOT YET IN PACKAGIST, COMING SOON!
 
 ## Documentation
