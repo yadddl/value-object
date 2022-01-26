@@ -6,8 +6,8 @@ namespace Yadddl\ValueObject\Primitive;
 
 use DateTimeImmutable;
 use DateTimeInterface;
-use Yadddl\ValueObject\Error\InvalidValueObject;
 use JetBrains\PhpStorm\Pure;
+use Yadddl\ValueObject\Error\InvalidValueObject;
 
 final class Date implements \Stringable
 {
@@ -41,7 +41,8 @@ final class Date implements \Stringable
         return $this->years;
     }
 
-    #[Pure] public function __toString(): string
+    #[Pure]
+    public function __toString(): string
     {
         return self::toString($this->years, $this->months, $this->days);
     }
@@ -57,7 +58,8 @@ final class Date implements \Stringable
         return $result;
     }
 
-    #[Pure] public function toInt(): int
+    #[Pure]
+    public function toInt(): int
     {
         return (int)sprintf('%04d%02d%02d000000', $this->years, $this->months, $this->days);
     }
@@ -131,7 +133,8 @@ final class Date implements \Stringable
         return self::createFromString($value);
     }
 
-    #[Pure] public function equalsTo(Date $date): bool
+    #[Pure]
+    public function equalsTo(Date $date): bool
     {
         return $this->days === $date->days
             && $this->months === $date->months
