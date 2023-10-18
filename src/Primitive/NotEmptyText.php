@@ -6,5 +6,6 @@ namespace Yadddl\ValueObject\Primitive;
 
 readonly class NotEmptyText extends Text
 {
+    /** @var string  */
     protected const REGEX = '/./';
 }

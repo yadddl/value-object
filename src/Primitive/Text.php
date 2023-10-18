@@ -12,6 +12,7 @@ use function preg_match;
 
 readonly class Text extends Primitive
 {
+    /** @var string  */
     protected const REGEX = '/(.+)/';
 
     public function __toString(): string
@@ -42,7 +43,8 @@ readonly class Text extends Primitive
      */
     protected function validate(string|float|bool|int $value): void
     {
-        /** @var string $regex */
+        /** @psalm-var non-empty-string $regex
+         */
         $regex = static::REGEX;
 
         $castedValue = $this->cast($value);
