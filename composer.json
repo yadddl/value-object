@@ -37,7 +37,7 @@
     "yadddl/serializer": "In order to serialize the objects"
   },
   "scripts": {
-    "test": "phpunit",
+    "test": "pest",
     "test-with-coverage": "phpunit --coverage-clover clover.xml ",
     "phpstan": "phpstan",
     "psalm": "psalm",
