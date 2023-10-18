@@ -1,0 +1,23 @@
+<phpunit
+        bootstrap="vendor/autoload.php"
+        forceCoversAnnotation="false"
+        beStrictAboutCoversAnnotation="false"
+>
+    <coverage cacheDirectory="./cache/"
+              includeUncoveredFiles="true"
+              processUncoveredFiles="true"
+              pathCoverage="false"
+              ignoreDeprecatedCodeUnits="false"
+              >
+
+        <include>
+            <directory suffix=".php">src</directory>
+        </include>
+    </coverage>
+
+    <testsuites>
+        <testsuite name="default">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>

@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Yadddl\ValueObject\Primitive;
+namespace Yadddl\ValueObject\Unit\Primitive;
 
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Yadddl\ValueObject\Error\InvalidValueObject;
+use Yadddl\ValueObject\Primitive\Text;
 
 /**
  * @covers \Yadddl\ValueObject\Primitive\Text
@@ -34,7 +35,7 @@ class TextTest extends TestCase
 
         Assert::assertInstanceOf(ExampleText::class, $rightText);
         Assert::assertInstanceOf(InvalidValueObject::class, $wrongText);
-        Assert::assertSame('invalid string', $wrongText->getType());
+        Assert::assertSame('invalid string', $wrongText->type);
         Assert::assertSame('Invalid string: \'wrong text\' does not match with \'/^test/\'', $wrongText->getMessage());
     }
 }

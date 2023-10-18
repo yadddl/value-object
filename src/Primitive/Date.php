@@ -9,72 +9,15 @@ use DateTimeInterface;
 use JetBrains\PhpStorm\Pure;
 use Yadddl\ValueObject\Error\InvalidValueObject;
 
-final class Date implements \Stringable
+readonly class Date implements \Stringable
 {
     private const FORMAT = 'Y-m-d';
 
-    private int $days;
-
-    private int $months;
-
-    private int $years;
-
-    private function __construct(int $days, int $months, int $years)
-    {
-        $this->days = $days;
-        $this->months = $months;
-        $this->years = $years;
-    }
-
-    public function getDays(): int
-    {
-        return $this->days;
-    }
-
-    public function getMonths(): int
-    {
-        return $this->months;
-    }
-
-    public function getYears(): int
-    {
-        return $this->years;
-    }
-
-    #[Pure]
-    public function __toString(): string
-    {
-        return self::toString($this->years, $this->months, $this->days);
-    }
-
-    public function toDateTimeImmutable(): DateTimeImmutable
-    {
-        $dateAsString = "{$this}T00:00:00Z";
-
-        $result = DateTimeImmutable::createFromFormat(DateTimeInterface::RFC3339, $dateAsString);
-
-        assert($result !== false);
-
-        return $result;
-    }
-
-    #[Pure]
-    public function toInt(): int
-    {
-        return (int)sprintf('%04d%02d%02d000000', $this->years, $this->months, $this->days);
-    }
-
-    public function format(string $format): string
-    {
-        return $this->toDateTimeImmutable()->format($format);
-    }
-
-    /**
-     * @psalm-pure
-     */
-    protected static function toString(int $years, int $months, int $days): string
-    {
-        return \sprintf('%4d-%02d-%02d', $years, $months, $days);
+    private function __construct(
+        public int $days,
+        public int $months,
+        public int $years
+    ) {
     }
 
     public static function now(): Date
@@ -91,6 +34,22 @@ final class Date implements \Stringable
         return new Date($days, $months, $years);
     }
 
+    public function format(string $format): string
+    {
+        return $this->toDateTimeImmutable()->format($format);
+    }
+
+    public function toDateTimeImmutable(): DateTimeImmutable
+    {
+        $dateAsString = "{$this}T00:00:00Z";
+
+        $result = DateTimeImmutable::createFromFormat(DateTimeInterface::RFC3339, $dateAsString);
+
+        assert($result !== false);
+
+        return $result;
+    }
+
     public static function createFromFormat(string $dateAsString, string $format): Date|InvalidValueObject
     {
         $date = DateTimeImmutable::createFromFormat($format, $dateAsString);
@@ -102,9 +61,13 @@ final class Date implements \Stringable
         return self::createFromDateTimeInterface($date);
     }
 
-    public static function createFromString(string $dateAsString): Date|InvalidValueObject
+    public static function create(string|self|DateTimeInterface $value): Date|InvalidValueObject
     {
-        return self::createFromFormat($dateAsString, self::FORMAT);
+        return match (true) {
+            $value instanceof self              => self::createFrom($value->days, $value->months, $value->years),
+            $value instanceof DateTimeInterface => self::createFromDateTimeInterface($value),
+            default                             => self::fromString($value)
+        };
     }
 
     public static function createFrom(int $days, int $months, int $years): Date|InvalidValueObject
@@ -120,17 +83,29 @@ final class Date implements \Stringable
         return new Date($days, $months, $years);
     }
 
-    public static function create(string|self|DateTimeInterface $value): Date|InvalidValueObject
+    /**
+     * @psalm-pure
+     */
+    protected static function toString(int $years, int $months, int $days): string
     {
-        if ($value instanceof self) {
-            return self::createFrom($value->days, $value->months, $value->years);
-        }
+        return \sprintf('%4d-%02d-%02d', $years, $months, $days);
+    }
 
-        if ($value instanceof DateTimeInterface) {
-            return self::createFromDateTimeInterface($value);
-        }
+    public static function fromString(string $dateAsString): Date|InvalidValueObject
+    {
+        return self::createFromFormat($dateAsString, self::FORMAT);
+    }
 
-        return self::createFromString($value);
+    #[Pure]
+    public function __toString(): string
+    {
+        return self::toString($this->years, $this->months, $this->days);
+    }
+
+    #[Pure]
+    public function toInt(): int
+    {
+        return (int)sprintf('%04d%02d%02d000000', $this->years, $this->months, $this->days);
     }
 
     #[Pure]

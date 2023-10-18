@@ -1,23 +1,18 @@
-<phpunit
-        bootstrap="vendor/autoload.php"
-        forceCoversAnnotation="true"
-        beStrictAboutCoversAnnotation="false"
->
-    <coverage cacheDirectory="./cache/"
-              includeUncoveredFiles="true"
-              processUncoveredFiles="true"
-              pathCoverage="false"
-              ignoreDeprecatedCodeUnits="false"
-              >
-
-        <include>
-            <directory suffix=".php">src</directory>
-        </include>
-    </coverage>
-
-    <testsuites>
-        <testsuite name="default">
-            <directory>tests</directory>
-        </testsuite>
-    </testsuites>
+<?xml version="1.0"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" bootstrap="vendor/autoload.php" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.1/phpunit.xsd" cacheDirectory=".phpunit.cache" requireCoverageMetadata="false" beStrictAboutCoverageMetadata="false">
+  <coverage>
+    <include>
+      <directory suffix=".php">./src</directory>
+    </include>
+  </coverage>
+  <testsuites>
+    <testsuite name="default">
+      <directory>tests</directory>
+    </testsuite>
+  </testsuites>
+  <source>
+    <include>
+      <directory suffix=".php">src</directory>
+    </include>
+  </source>
 </phpunit>

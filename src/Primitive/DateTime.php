@@ -5,25 +5,17 @@ declare(strict_types=1);
 namespace Yadddl\ValueObject\Primitive;
 
 use DateTimeImmutable;
-use Yadddl\ValueObject\Error\InvalidValueObject;
 use JetBrains\PhpStorm\Pure;
+use Yadddl\ValueObject\Error\InvalidValueObject;
 
-final class DateTime implements \Stringable
+readonly class DateTime implements \Stringable
 {
     public const SIMPLE = 'Y-m-d H:i:s';
 
-    public function __construct(private Date $date, private Time $time)
-    {
-    }
-
-    public function getDate(): Date
-    {
-        return $this->date;
-    }
-
-    public function getTime(): Time
-    {
-        return $this->time;
+    public function __construct(
+        public Date $date,
+        public Time $time
+    ) {
     }
 
     public static function now(): DateTime
@@ -31,36 +23,13 @@ final class DateTime implements \Stringable
         return new DateTime(Date::now(), Time::now());
     }
 
-    #[Pure] public function __toString(): string
+    public static function create(string|\DateTimeInterface|DateTime $value): DateTime|InvalidValueObject
     {
-        return "{$this->date} {$this->time}";
-    }
-
-    /**
-     * @see toDateTimeImmutable
-     */
-    public function toDateTimeInterface(): \DateTimeInterface
-    {
-        return $this->toDateTimeImmutable();
-    }
-
-    public function format(string $format): string
-    {
-        /** @var DateTimeImmutable $dateTime */
-        $dateTime = $this->toDateTimeInterface();
-
-        return $dateTime->format($format);
-    }
-
-    public function toDateTimeImmutable(): \DateTimeImmutable
-    {
-        $dateTime = (string)$this;
-
-        $result = \DateTimeImmutable::createFromFormat(self::SIMPLE, $dateTime);
-
-        assert($result !== false);
-
-        return $result;
+        return match (true) {
+            $value instanceof self               => $value,
+            $value instanceof \DateTimeInterface => self::createFromDateTimeInterface($value),
+            default                              => self::createFromString($value)
+        };
     }
 
     public static function createFromDateTimeInterface(\DateTimeInterface $dateTime): DateTime
@@ -69,6 +38,11 @@ final class DateTime implements \Stringable
         $time = Time::createFromDateTimeInterface($dateTime);
 
         return new DateTime($date, $time);
+    }
+
+    public static function createFromString(string $dateTimeString): DateTime|InvalidValueObject
+    {
+        return self::createFromFormat($dateTimeString, self::SIMPLE);
     }
 
     public static function createFromFormat(string $dateTimeString, string $format): DateTime|InvalidValueObject
@@ -82,9 +56,31 @@ final class DateTime implements \Stringable
         return self::createFromDateTimeInterface($dateTime);
     }
 
-    public static function createFromString(string $dateTimeString): DateTime|InvalidValueObject
+    public function format(string $format): string
     {
-        return self::createFromFormat($dateTimeString, self::SIMPLE);
+        /** @var DateTimeImmutable $dateTime */
+        $dateTime = $this->toDateTimeInterface();
+
+        return $dateTime->format($format);
+    }
+
+    /**
+     * @see toDateTimeImmutable
+     */
+    public function toDateTimeInterface(): \DateTimeInterface
+    {
+        return $this->toDateTimeImmutable();
+    }
+
+    public function toDateTimeImmutable(): \DateTimeImmutable
+    {
+        $dateTime = (string)$this;
+
+        $result = \DateTimeImmutable::createFromFormat(self::SIMPLE, $dateTime);
+
+        assert($result !== false);
+
+        return $result;
     }
 
     #[Pure] public function toInt(): int
@@ -98,21 +94,13 @@ final class DateTime implements \Stringable
             && $this->time->equalsTo($value->time);
     }
 
-    public static function create(string|\DateTimeInterface|DateTime $value): DateTime|InvalidValueObject
-    {
-        if ($value instanceof self) {
-            return $value;
-        }
-
-        if ($value instanceof \DateTimeInterface) {
-            return self::createFromDateTimeInterface($value);
-        }
-
-        return self::createFromString($value);
-    }
-
     #[Pure] public function toString(): string
     {
         return $this->__toString();
+    }
+
+    #[Pure] public function __toString(): string
+    {
+        return "{$this->date} {$this->time}";
     }
 }

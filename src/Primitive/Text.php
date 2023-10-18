@@ -8,21 +8,18 @@ use Yadddl\ValueObject\Error\InvalidString;
 use Yadddl\ValueObject\Error\InvalidValueObject;
 use JetBrains\PhpStorm\Pure;
 use Stringable;
+
 use function preg_match;
 
 class Text implements Stringable
 {
-    private string $value;
-
     protected string $regex = '/(.+)/';
 
     protected string|null $errorMessage = null;
 
-    final public function __construct(string $value)
+    final public function __construct(readonly public string $value)
     {
         $this->validate($value);
-
-        $this->value = $value;
     }
 
     public function __toString(): string
@@ -30,7 +27,10 @@ class Text implements Stringable
         return $this->value;
     }
 
-    private function validate(string $value): void
+    /**
+     * @throws InvalidString
+     */
+    protected function validate(string $value): void
     {
         if (preg_match($this->regex, $value) !== 1) {
             /** @psalm-var non-empty-string $message */
@@ -45,7 +45,7 @@ class Text implements Stringable
         try {
             return new static((string)$value);
         } catch (InvalidString $exception) {
-            return new InvalidValueObject('invalid string', $exception->getMessage());
+            return new InvalidValueObject('invalid string', $exception->getMessage(), $exception);
         }
     }
 
