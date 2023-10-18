@@ -50,7 +50,7 @@ readonly class DateTime implements \Stringable
         $dateTime = DateTimeImmutable::createFromFormat($format, $dateTimeString);
 
         if ($dateTime === false) {
-            return new InvalidValueObject( "Invalid date time '{$dateTimeString}' provided for the format '{$format}'");
+            return new InvalidValueObject("Invalid date time '{$dateTimeString}' provided for the format '{$format}'");
         }
 
         return self::createFromDateTimeInterface($dateTime);

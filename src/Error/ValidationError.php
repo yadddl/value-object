@@ -57,6 +57,6 @@ class ValidationError extends ValueError
             $invalidFields[$key] = $error->getError()->getMessage();
         }
 
-        return ['class'=> $this->className, 'fields' => $invalidFields];
+        return ['class' => $this->className, 'fields' => $invalidFields];
     }
 }

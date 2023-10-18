@@ -7,6 +7,7 @@ namespace Yadddl\ValueObject\Primitive;
 use Yadddl\ValueObject\Error\IntegerTooBig;
 use Yadddl\ValueObject\Error\IntegerTooSmall;
 use Yadddl\ValueObject\Error\InvalidInteger;
+
 use const PHP_INT_MAX;
 use const PHP_INT_MIN;
 

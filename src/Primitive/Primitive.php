@@ -16,11 +16,11 @@ abstract readonly class Primitive implements \Stringable
         $this->value = $this->cast($value);
     }
 
-    protected abstract function validate(int|float|string|bool $value): void;
+    abstract protected function validate(int|float|string|bool $value): void;
 
-    protected abstract function cast(int|float|string|bool $value): int|float|string|bool;
+    abstract protected function cast(int|float|string|bool $value): int|float|string|bool;
 
-    public final static function create(self|int|float|string|bool $value): static|InvalidValueObject
+    final public static function create(self|int|float|string|bool $value): static|InvalidValueObject
     {
         try {
 
@@ -38,7 +38,8 @@ abstract readonly class Primitive implements \Stringable
         return (string)$this->value;
     }
 
-    public function equals(Primitive $object): bool {
+    public function equals(Primitive $object): bool
+    {
         return $object instanceof static
             && $object->value === $this->value;
     }

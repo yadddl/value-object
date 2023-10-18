@@ -15,7 +15,8 @@ final readonly class Time implements \Stringable
         public int $hours,
         public int $minutes,
         public int $seconds
-    ) {}
+    ) {
+    }
 
     public static function create(string $time): Time|InvalidValueObject
     {

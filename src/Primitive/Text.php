@@ -7,6 +7,7 @@ namespace Yadddl\ValueObject\Primitive;
 use phpDocumentor\Reflection\Types\Static_;
 use Yadddl\ValueObject\Error\InvalidString;
 use Yadddl\ValueObject\Error\InvalidValueObject;
+
 use function preg_match;
 
 readonly class Text extends Primitive
