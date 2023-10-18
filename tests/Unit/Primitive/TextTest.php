@@ -25,7 +25,7 @@ class TextTest extends TestCase
 
         $text2 = Text::create('Pippo');
         Assert::assertInstanceOf(Text::class, $text2);
-        Assert::assertTrue($text->equalsTo($text2));
+        Assert::assertObjectEquals($text2, $text);
     }
 
     public function testExtension(): void
@@ -35,11 +35,10 @@ class TextTest extends TestCase
 
         Assert::assertInstanceOf(ExampleText::class, $rightText);
         Assert::assertInstanceOf(InvalidValueObject::class, $wrongText);
-        Assert::assertSame('invalid string', $wrongText->type);
         Assert::assertSame('Invalid string: \'wrong text\' does not match with \'/^test/\'', $wrongText->getMessage());
     }
 }
 
-class ExampleText extends Text {
-    protected string $regex = '/^test/';
+readonly class ExampleText extends Text {
+    protected const REGEX = '/^test/';
 }

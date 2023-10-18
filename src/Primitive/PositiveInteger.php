@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Yadddl\ValueObject\Primitive;
 
-class PositiveInteger extends Integer
+readonly class PositiveInteger extends Integer
 {
-    protected int $min = 0;
+    protected const MIN = 0;
 }

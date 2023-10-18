@@ -15,8 +15,7 @@ final readonly class Time implements \Stringable
         public int $hours,
         public int $minutes,
         public int $seconds
-    ) {
-    }
+    ) {}
 
     public static function create(string $time): Time|InvalidValueObject
     {
@@ -26,7 +25,7 @@ final readonly class Time implements \Stringable
     public static function fromString(string $time): Time|InvalidValueObject
     {
         if (!preg_match('/^([0-1]?[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$/', $time, $matches)) {
-            return new InvalidValueObject('invalid time', "Invalid time provided: '{$time}'");
+            return new InvalidValueObject("Invalid time provided: '{$time}'");
         }
 
         [, $hours, $minutes, $seconds] = $matches;

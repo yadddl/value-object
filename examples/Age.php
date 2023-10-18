@@ -35,7 +35,7 @@ class Age
         $minimumAge = 18;
 
         if ($age < $minimumAge) {
-            return new InvalidValueObject('age too low', "The age should be at least $minimumAge");
+            return new InvalidValueObject( "The age should be at least $minimumAge");
         }
 
         return new Age($age);

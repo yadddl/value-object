@@ -36,7 +36,7 @@ class Name implements Stringable
         $minimumNameLength = 5;
 
         if (strlen($name) < $minimumNameLength) {
-            return new InvalidValueObject('name', __CLASS__ . " should be at least $minimumNameLength characters");
+            return new InvalidValueObject( __CLASS__ . " should be at least $minimumNameLength characters");
         }
 
         return new Name($name);

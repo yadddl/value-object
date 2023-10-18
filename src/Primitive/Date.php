@@ -55,7 +55,7 @@ readonly class Date implements \Stringable
         $date = DateTimeImmutable::createFromFormat($format, $dateAsString);
 
         if ($date === false) {
-            return new InvalidValueObject('invalid date', "Invalid date '{$dateAsString}' provided for the format '{$format}'");
+            return new InvalidValueObject( "Invalid date '{$dateAsString}' provided for the format '{$format}'");
         }
 
         return self::createFromDateTimeInterface($date);
@@ -77,7 +77,7 @@ readonly class Date implements \Stringable
         $date = DateTimeImmutable::createFromFormat(self::FORMAT, $dateAsString);
 
         if ($date === false || $date->format(self::FORMAT) !== $dateAsString) {
-            return new InvalidValueObject('invalid date', "Invalid date provided: '{$dateAsString}'");
+            return new InvalidValueObject( "Invalid date provided: '{$dateAsString}'");
         }
 
         return new Date($days, $months, $years);

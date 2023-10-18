@@ -31,8 +31,8 @@ class PositiveIntegerTest extends TestCase
         Assert::assertInstanceOf(PositiveInteger::class, $positive);
         Assert::assertSame($expectedResult, $positive->value);
         Assert::assertSame((string)$expectedResult, (string)$positive);
-        Assert::assertTrue($positive->equalsTo($positive));
-        Assert::assertTrue($positive->equalsTo(PositiveInteger::create($expectedResult)));
+        Assert::assertObjectEquals($positive, $positive);
+        Assert::assertObjectEquals(PositiveInteger::create($expectedResult), $positive);
     }
 
     public function testLeft(): void
@@ -40,7 +40,6 @@ class PositiveIntegerTest extends TestCase
         $error = PositiveInteger::create(-20);
 
         Assert::assertInstanceOf(InvalidValueObject::class, $error);
-        Assert::assertSame('integer too small', $error->type);
         Assert::assertSame( 'The value -20 is too small. Minimum 0', $error->getMessage());
     }
 }

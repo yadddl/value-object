@@ -4,63 +4,55 @@ declare(strict_types=1);
 
 namespace Yadddl\ValueObject\Primitive;
 
+use phpDocumentor\Reflection\Types\Static_;
 use Yadddl\ValueObject\Error\InvalidString;
 use Yadddl\ValueObject\Error\InvalidValueObject;
-use JetBrains\PhpStorm\Pure;
-use Stringable;
-
 use function preg_match;
 
-class Text implements Stringable
+readonly class Text extends Primitive
 {
-    protected string $regex = '/(.+)/';
-
-    protected string|null $errorMessage = null;
-
-    final public function __construct(readonly public string $value)
-    {
-        $this->validate($value);
-    }
+    protected const REGEX = '/(.+)/';
 
     public function __toString(): string
     {
-        return $this->value;
+        return (string)$this->value;
+    }
+
+    public function toUpperCase(): static
+    {
+        $result = static::create(strtoupper((string)$this->value));
+
+        assert($result instanceof static);
+
+        return $result;
+    }
+
+    public function toLowerCase(): static
+    {
+        $result = static::create(strtolower((string)$this->value));
+
+        assert($result instanceof static);
+
+        return $result;
     }
 
     /**
      * @throws InvalidString
      */
-    protected function validate(string $value): void
+    protected function validate(string|float|bool|int $value): void
     {
-        if (preg_match($this->regex, $value) !== 1) {
-            /** @psalm-var non-empty-string $message */
-            $message = $this->errorMessage ?? "Invalid string: '{$value}' does not match with '{$this->regex}'";
+        /** @var string $regex */
+        $regex = static::REGEX;
 
-            throw new InvalidString($message);
+        $castedValue = $this->cast($value);
+
+        if (preg_match($regex, $castedValue) !== 1) {
+            throw new InvalidString("Invalid string: '{$castedValue}' does not match with '{$regex}'");
         }
     }
 
-    final public static function create(string|Stringable $value): static|InvalidValueObject
+    protected function cast(float|bool|int|string $value): string
     {
-        try {
-            return new static((string)$value);
-        } catch (InvalidString $exception) {
-            return new InvalidValueObject('invalid string', $exception->getMessage(), $exception);
-        }
-    }
-
-    #[Pure] public function equalsTo(Text $value): bool
-    {
-        return $this->value === $value->value;
-    }
-
-    public function toUpperCase(): static
-    {
-        return new static(strtoupper($this->value));
-    }
-
-    public function toLowerCase(): static
-    {
-        return new static(strtolower($this->value));
+        return (string)$value;
     }
 }

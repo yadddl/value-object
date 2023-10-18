@@ -21,7 +21,7 @@ it('should give an error in case of an empty string is given', function () {
     $text = NotEmptyText::create('');
 
     expect($text)->toBeInstanceOf(InvalidValueObject::class)
-        ->getMessage()->toBe('The string should not be empty');
+        ->getMessage()->toBe('Invalid string: \'\' does not match with \'/./\'');
 });
 
 
