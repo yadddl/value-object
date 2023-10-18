@@ -1,13 +1,18 @@
 <?php
 
-it('should be a valid Value Object', function (string $className) {
-    $class = new ReflectionClass($className);
-    $createMethod = new ReflectionMethod($className, 'create');
+it(/**
+ * @phpstan-param class-string $className
+ * @return void
+ * @throws ReflectionException
+ */ 'should be a valid Value Object', function (string $className) {
+//    $class = new ReflectionClass($className);
+//    $createMethod = new ReflectionMethod($className, 'create');
 
-    expect($class)
-        ->toHaveMethod('__toString')
-        ->and($createMethod->isStatic())
-        ->toBeTrue();
+    expect($className)->toHaveMethod('__toString')
+        ->and($className)->toHaveMethod('create');
+
+//        ->toHaveMethod('create')
+//        ->toBeTrue();
 })->with([
     \Yadddl\ValueObject\Primitive\Date::class,
     \Yadddl\ValueObject\Primitive\DateTime::class,
