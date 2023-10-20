@@ -8,8 +8,8 @@ use JetBrains\PhpStorm\Pure;
 
 class InvalidInteger extends ValueError
 {
-    #[Pure] public function __construct(int|float|string|bool $value)
+    #[Pure] public function __construct(int|float|string|bool $value, string $field)
     {
-        parent::__construct("The value {$value} is not valid");
+        parent::__construct("The value {$value} is not valid", $field);
     }
 }

@@ -6,10 +6,11 @@ namespace Yadddl\ValueObject\Error;
 
 final class InvalidValueObject extends ValueError
 {
-    public function __construct(string $message, \Throwable $previous = null)
+    public function __construct(string $message, string $field, \Throwable $previous = null)
     {
         parent::__construct(
             message: $message,
+            field: $field,
             previous: $previous
         );
     }

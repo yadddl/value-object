@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Yadddl\ValueObject\Primitive;
+namespace Yadddl\ValueObject\Composite;
 
 use DateTimeImmutable;
 use DateTimeInterface;

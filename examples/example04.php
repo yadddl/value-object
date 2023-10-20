@@ -8,8 +8,8 @@ use Yadddl\ValueObject\Primitive\Text;
 use function Yadddl\ValueObject\factory;
 
 
-class ExampleText extends Text {
-    protected string $regex = '/^ciao/';
+readonly class ExampleText extends Text {
+    protected const  REGEX = '/^ciao/';
 }
 
 $text = ExampleText::create('ciao mondo');

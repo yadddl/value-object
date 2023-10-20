@@ -6,29 +6,22 @@ namespace Yadddl\ValueObject\Error;
 
 use JetBrains\PhpStorm\Pure;
 
-class ValidationError extends ValueError
+class ValidationError extends \ValueError
 {
     use FailableTrait;
 
-    /** @var list<FieldError>  */
+    /** @var list<FieldError> */
     private array $errors = [];
 
-    #[Pure] public function __construct(private string $className)
-    {
-        parent::__construct("Invalid {$this->className}");
+    #[Pure] public function __construct(
+        public readonly string $className,
+        public readonly string $shortName
+    ) {
+        parent::__construct("Invalid {$this->shortName}");
     }
 
-    public function addError(FieldError $error): void
-    {
-        $this->errors[] = $error;
-    }
-
-    /**
-     * @psalm-return list<FieldError>
-     */
-    public function getErrors(): array
-    {
-        return $this->errors;
+    public static function fromReflectionClass(\ReflectionClass $class): ValidationError {
+        return new ValidationError($class->getName(), $class->getShortName());
     }
 
     public function hasErrors(): bool
@@ -46,6 +39,19 @@ class ValidationError extends ValueError
     }
 
     /**
+     * @psalm-return list<FieldError>
+     */
+    public function getErrors(): array
+    {
+        return $this->errors;
+    }
+
+    public function addError(FieldError $error): void
+    {
+        $this->errors[] = $error;
+    }
+
+    /**
      * @return array{class : string, fields : array<string, string>}
      */
     #[Pure] public function getInvalidFields(): array
@@ -53,10 +59,15 @@ class ValidationError extends ValueError
         $invalidFields = [];
 
         foreach ($this->errors as $error) {
-            $key =  $error->getKey();
-            $invalidFields[$key] = $error->getError()->getMessage();
+            $key = $error->key;
+            $invalidFields[$key] = $error->message;
         }
 
-        return ['class' => $this->className, 'fields' => $invalidFields];
+        return [
+            'class' => $this->className,
+            'shortName' => $this->shortName,
+            'message' => $this->message,
+            'fields' => $invalidFields
+        ];
     }
 }

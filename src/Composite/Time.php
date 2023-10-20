@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Yadddl\ValueObject\Primitive;
+namespace Yadddl\ValueObject\Composite;
 
 use DateTimeImmutable;
 use DateTimeInterface;
 use JetBrains\PhpStorm\Pure;
 use Yadddl\ValueObject\Error\InvalidValueObject;
 
-final readonly class Time implements \Stringable
+readonly class Time implements \Stringable
 {
     private function __construct(
         public int $hours,

@@ -4,23 +4,20 @@ declare(strict_types=1);
 
 namespace Yadddl\ValueObject;
 
-use Yadddl\ValueObject\Error\ValidationError;
 use ReflectionException;
+use Yadddl\ValueObject\Error\ValidationError;
+use Yadddl\ValueObject\Factory\BuilderImpl;
 
 /**
  * @template T of object
  *
  * @psalm-param class-string<T> $target
- * @param mixed ...$args
- *
+ * @param array|int|string|bool|float $data
  * @return ValidationError|object
  *
- * @throws ReflectionException
- *
- * @psalm-return T|ValidationError
  */
-function factory(string $target, ...$args)
+function factory(string $target, array|int|string|bool|float $data)
 {
-    $factory = new Factory($target);
-    return $factory->make(...$args);
+    $factory = new BuilderImpl();
+    return $factory->build($target, $data);
 }

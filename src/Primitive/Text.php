@@ -10,52 +10,48 @@ use Yadddl\ValueObject\Error\InvalidValueObject;
 
 use function preg_match;
 
-readonly class Text extends Primitive
+readonly class Text
 {
     /** @var string  */
     protected const REGEX = '/(.+)/';
 
+    final public function __construct(public string $value)
+    {
+        $this->validate($value);
+    }
+
+
     public function __toString(): string
     {
-        return (string)$this->value;
+        return $this->value;
     }
 
     public function toUpperCase(): static
     {
-        $result = static::create(strtoupper((string)$this->value));
-
-        assert($result instanceof static);
-
-        return $result;
+        return new static(strtoupper($this->value));
     }
 
     public function toLowerCase(): static
     {
-        $result = static::create(strtolower((string)$this->value));
-
-        assert($result instanceof static);
-
-        return $result;
+        return new static(strtolower($this->value));
     }
 
     /**
      * @throws InvalidString
      */
-    protected function validate(string|float|bool|int $value): void
+    protected function validate(string $value): void
     {
         /** @psalm-var non-empty-string $regex
          */
         $regex = static::REGEX;
 
-        $castedValue = $this->cast($value);
-
-        if (preg_match($regex, $castedValue) !== 1) {
-            throw new InvalidString("Invalid string: '{$castedValue}' does not match with '{$regex}'");
+        if (preg_match($regex, $value) !== 1) {
+            throw new InvalidString("Invalid string: '{$value}' does not match with '{$regex}'", 'value');
         }
     }
 
-    protected function cast(float|bool|int|string $value): string
+    public function equals(Text $object): bool
     {
-        return (string)$value;
+        return $object->value === $this->value;
     }
 }

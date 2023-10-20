@@ -6,26 +6,18 @@ namespace Yadddl\ValueObject\Error;
 
 use JetBrains\PhpStorm\Pure;
 
-final class FieldError
+final readonly class FieldError
 {
-    public function __construct(private string $key, private InvalidValueObject $error)
-    {
-    }
-
-    public function getKey(): string
-    {
-        return $this->key;
-    }
-
-    public function getError(): InvalidValueObject
-    {
-        return $this->error;
-    }
+    public function __construct(
+        public string $key,
+        public string $message,
+        public ?\Throwable $previous = null
+    ) {}
 
     #[Pure] public function addPrefix(string $prefix): FieldError
     {
-        $key = sprintf("%s.%s", $prefix, $this->key);
+        $newKey = sprintf("%s.%s", $prefix, $this->key);
 
-        return new FieldError($key, $this->error);
+        return new FieldError($newKey, $this->message, $this->previous);
     }
 }

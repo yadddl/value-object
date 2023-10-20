@@ -10,7 +10,8 @@
     }
   ],
   "require": {
-    "php": ">=8.2"
+    "php": ">=8.2",
+    "cuyz/valinor": "^1.6"
   },
   "require-dev": {
     "vimeo/psalm": "^5.9",

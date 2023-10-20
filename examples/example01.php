@@ -1,19 +1,24 @@
 <?php
 
-require_once (__DIR__ . '/../vendor/autoload.php');
+require_once(__DIR__ . '/../vendor/autoload.php');
 
 use Yadddl\ValueObject\Primitive\Text;
-use Yadddl\ValueObject\Serializer\SerializerBaseFactory;
-
-// Getting the base serializer (you can customize it, if you want)
-$serializer = SerializerBaseFactory::make();
 
 // Creating the value object
-$text1 = Text::create('Hello, world!');
-$text2 = Text::create('World, Hello!');
+$text1 = Text::create('Hello');
+$text2 = Text::create('World');
 
-// Serializing it
-var_dump($serializer->serialize($text1)); // string(13) "Hello, world!"
-var_dump((string)$text1);                 // string(13) "Hello, world!"
-var_dump($text1->equalsTo($text1));      //bool(true)
-var_dump($text1->equalsTo($text2));      //bool(false)
+echo $text1->value . PHP_EOL;
+// prints "Hello"
+
+echo (string)$text1 . PHP_EOL;
+// prints "Hello"
+
+echo "{$text1}, {$text2}!\n";
+// prints "Hello, World!"
+
+echo ($text1->equals($text1) ? 'Yes' : 'No') . PHP_EOL;
+// prints "Yes"
+
+echo ($text1->equals($text2) ? 'Yes' : 'No') . PHP_EOL;
+// prints "No"
