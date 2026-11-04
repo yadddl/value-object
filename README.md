@@ -37,6 +37,35 @@ readonly final class Age
 
 See `examples/` for `Age`, `Password`, `Person`, `Money`, and more.
 
+## Structural serialize / deserialize
+
+```php
+use Yadddl\Serializer\StructuralConverter;
+use Yadddl\ValueObject\Examples\Age;
+use Yadddl\ValueObject\Examples\Person;
+
+$converter = StructuralConverter::create();
+
+$converter->toArray(Age::create(25)->orFail()); // 25 (ValidatedValue → scalar)
+$converter->fromArray(25, Age::class);          // Age|ErrorsBag
+
+$payload = $converter->toArray(
+    Person::create('Jane', 'jane@example.com', 28)->orFail()
+);
+// ['name' => 'Jane', 'email' => 'jane@example.com', 'age' => 28]
+
+$person = $converter->fromArray($payload, Person::class);
+// Person|MultipleFieldErrorsBag — domain factories validate; serializer does not
+```
+
+Conventions:
+
+- `ValidatedValue` → bare scalar
+- public properties → associative array (recursive)
+- enums → backing value / case name
+- deserialize calls `create` / matching `create*` factories (never bypasses constructors)
+- invalid input propagates `ErrorsBag` / `MultipleFieldErrorsBag` to the entry point
+
 ## Development
 
 ```bash
@@ -46,6 +75,6 @@ composer test-coverage   # requires Xdebug; enforces 100%
 composer psalm
 ```
 
-## Migration from 0.8
+## Migration from 0.8 / standalone serializer
 
-This is a **major** rewrite toward the functional PHP 8.5 model. Legacy constructor-throwing primitives, `factory()`/`Builder`, and Valinor are removed. Details will land in the changelog before `1.0.0`.
+This is a **major** rewrite toward the functional PHP 8.5 model. Legacy constructor-throwing primitives, `factory()`/`Builder`, and Valinor are removed. Structural conversion now lives in this package under `Yadddl\Serializer` (replacing standalone `yadddl/serializer`).
