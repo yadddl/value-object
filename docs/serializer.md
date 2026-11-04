@@ -47,7 +47,7 @@ new StructuralSerializer([
 ]);
 ```
 
-`StructuralConverter::create()` registers Date/Time/DateTime as **strings** so they round-trip through `create(string)`.
+`StructuralConverter::create()` registers Date/Time/DateTime/DateTimeWithTimeZone as **strings** so they round-trip through `create(string)`.
 
 Without that, Date serializes to `['days'=>…,'months'=>…,'years'=>…]` and deserializes via `Date::createFrom(...)`.
 

@@ -6,6 +6,7 @@ namespace Yadddl\Serializer;
 
 use Yadddl\ValueObject\Composite\Date;
 use Yadddl\ValueObject\Composite\DateTime;
+use Yadddl\ValueObject\Composite\DateTimeWithTimeZone;
 use Yadddl\ValueObject\Composite\Time;
 
 /**
@@ -20,7 +21,7 @@ final class StructuralConverter
     }
 
     /**
-     * Converter with Date/Time/DateTime serialized as strings for natural round-trips.
+     * Converter with Date/Time/DateTime(/WithTimeZone) serialized as strings for natural round-trips.
      */
     public static function create(): self
     {
@@ -29,6 +30,7 @@ final class StructuralConverter
             Date::class => static fn (Date $date): string => (string) $date,
             Time::class => static fn (Time $time): string => (string) $time,
             DateTime::class => static fn (DateTime $dateTime): string => (string) $dateTime,
+            DateTimeWithTimeZone::class => static fn (DateTimeWithTimeZone $dateTime): string => (string) $dateTime,
         ];
 
         return new self(

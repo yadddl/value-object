@@ -29,6 +29,8 @@ Every type below:
    - [Date](#date)
    - [Time](#time)
    - [DateTime](#datetime)
+   - [DateTimeWithTimeZone](#datetimewithtimezone)
+   - [TimeZone](#timezone)
 5. [Serialization cheat sheet](#serialization-cheat-sheet)
 6. [Choosing a type](#choosing-a-type)
 
@@ -48,6 +50,7 @@ Every type below:
 | [Integer](#integer) | `int` | Full `PHP_INT_MIN` … `PHP_INT_MAX` range | Override `MIN` / `MAX` | Yes | `equals()`, `__toString()` |
 | [PositiveInteger](#positiveinteger) | `int` | `MIN = 0`, `MAX = PHP_INT_MAX` | Same as Integer | Yes | Inherits Integer helpers |
 | [StrictlyPositiveInteger](#strictlypositiveinteger) | `int` | `MIN = 1`, `MAX = PHP_INT_MAX` | Same as Integer | Yes | Inherits Integer helpers |
+| [TimeZone](#timezone) | `string` | Valid PHP timezone id / offset (`DateTimeZone`) | Prefer a custom VO for allow-lists | Yes | `utc()`, `fromDateTimeZone()`, `toDateTimeZone()`, `equals()`, `__toString()` |
 
 ### Date composites (`Yadddl\ValueObject\Composite`)
 
@@ -55,8 +58,8 @@ Every type below:
 |------|-------|----------------|-------|------------------------------------------------------|
 | [Date](#date) | `days`, `months`, `years` | `create`, `createFrom`, `fromString`, `createFromFormat`, `now` | Strict calendar check (rejects 2024-02-30) | props array / `Y-m-d` string |
 | [Time](#time) | `hours`, `minutes`, `seconds` | `create`, `createFrom`, `fromString`, `now` | `HH:MM:SS` | props array / `H:i:s` string |
-| [DateTime](#datetime) | nested Date + Time | `create`, `createFromString`, `createFromFormat`, `createFromDateAndTime`, `now` | Format `Y-m-d H:i:s` | nested props / datetime string |
-
+| [DateTime](#datetime) | nested Date + Time | `create`, `createFromString`, `createFromFormat`, `createFromDateAndTime`, `now` | Naive / no zone; format `Y-m-d H:i:s` | nested props / datetime string |
+| [DateTimeWithTimeZone](#datetimewithtimezone) | Date + Time + [TimeZone](#timezone) | `create`, `createFromString`, `createFromFormat`, `createFromDateTimeAndTimeZone`, `now` | Format `Y-m-d H:i:s e` | nested props / zoned string |
 ---
 
 ## Text family
@@ -318,16 +321,60 @@ $dt->format('Y-m-d H:i');
 $dt->toDateTimeImmutable();
 ```
 
+Use this when the wall-clock value has **no** timezone meaning (or the zone lives elsewhere). Prefer [DateTimeWithTimeZone](#datetimewithtimezone) when the instant must carry a zone.
+
+### DateTimeWithTimeZone
+
+`Date` + `Time` + [`TimeZone`](#timezone). Default string form: `Y-m-d H:i:s e`.
+
+| Factory | Input |
+|---------|-------|
+| `create(string\|DateTimeInterface\|DateTimeWithTimeZone)` | `"2024-01-15 08:05:09 Europe/Rome"` / native / self |
+| `createFromDateTimeAndTimeZone(Date, Time, TimeZone)` | nested VOs |
+| `createFromString` / `createFromFormat` | formatted string |
+| `now(string\|\DateTimeZone\|TimeZone\|null)` | current instant in the given (or default) zone |
+
+```php
+use Yadddl\ValueObject\Composite\DateTimeWithTimeZone;
+use Yadddl\ValueObject\Primitive\TimeZone;
+
+$dt = DateTimeWithTimeZone::create('2024-01-15 08:05:09 Europe/Rome')->orFail();
+
+$dt->timeZone->value;           // "Europe/Rome"
+(string) $dt;                   // "2024-01-15 08:05:09 Europe/Rome"
+$dt->toDateTimeImmutable();     // zone preserved
+$dt->withoutTimeZone();         // naive DateTime (same date + time)
+DateTimeWithTimeZone::now(TimeZone::utc());
+```
+
+### TimeZone
+
+Validated PHP timezone identifier (or offset accepted by `DateTimeZone`). Lives in `Yadddl\ValueObject\Primitive`.
+
+| | |
+|--|--|
+| Create | `TimeZone::create(mixed $value): TimeZone\|ErrorsBag` |
+| Helpers | `utc()`, `fromDateTimeZone()`, `toDateTimeZone()` |
+
+```php
+use Yadddl\ValueObject\Primitive\TimeZone;
+
+TimeZone::create('Europe/Rome'); // TimeZone|ErrorsBag
+TimeZone::create('Not/AZone');   // ErrorsBag
+TimeZone::utc()->value;          // "UTC"
+```
+
 ---
 
 ## Serialization cheat sheet
 
 | Type | Default `StructuralSerializer` | With `StructuralConverter::create()` |
 |------|--------------------------------|--------------------------------------|
-| `Text`, `NotEmptyText`, `Email`, `Url`, `Uuid`, `Integer`, `PositiveInteger`, `StrictlyPositiveInteger` | **scalar** (`$value`) | same |
+| `Text`, `NotEmptyText`, `Email`, `Url`, `Uuid`, `Integer`, `PositiveInteger`, `StrictlyPositiveInteger`, `TimeZone` | **scalar** (`$value`) | same |
 | `Date` | `{days, months, years}` → `createFrom` | `"Y-m-d"` → `create(string)` |
 | `Time` | `{hours, minutes, seconds}` → `createFrom` | `"H:i:s"` → `create(string)` |
 | `DateTime` | `{date: {…}, time: {…}}` → `createFromDateAndTime` | `"Y-m-d H:i:s"` → `create(string)` |
+| `DateTimeWithTimeZone` | `{date, time, timeZone}` → `createFromDateTimeAndTimeZone` | `"Y-m-d H:i:s e"` → `create(string)` |
 
 Details: [serializer.md](serializer.md).
 
@@ -346,7 +393,8 @@ Details: [serializer.md](serializer.md).
 | Non-negative count / amount (zero ok) | `PositiveInteger` |
 | Positive count / id (zero rejected) | `StrictlyPositiveInteger` |
 | Bounded int (%, score, …) | Subclass `Integer` + `MIN`/`MAX` |
-| Calendar / clock values | `Date`, `Time`, `DateTime` |
+| Calendar / clock values (naive) | `Date`, `Time`, `DateTime` |
+| Instant with timezone | `DateTimeWithTimeZone` (+ `TimeZone`) |
 | Richer domain meaning (`Age`, `Money`, …) | Custom VO in your app (see [value-objects.md](value-objects.md) and `examples/`) |
 
 Library primitives are **building blocks**. Prefer a named domain VO when the concept carries business language beyond “string” or “int”.

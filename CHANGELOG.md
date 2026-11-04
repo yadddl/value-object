@@ -18,7 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Library primitives rewritten on pipes: `Text`, `NotEmptyText`, `Integer`, `PositiveInteger`, `StrictlyPositiveInteger`, `Email`, `Url`, `Uuid`
 - `StringValue::url()` validator (`FILTER_VALIDATE_URL`)
 - `Uuid` backed by `ramsey/uuid` (`generate()`, `fromRamsey()`, `toRamsey()`, lowercase storage)
-- Composites: `Date`, `Time`, `DateTime` returning `ErrorsBag` on failure
+- Composites: `Date`, `Time`, `DateTime`, `DateTimeWithTimeZone` returning `ErrorsBag` on failure
+- `TimeZone` primitive (`utc()`, `fromDateTimeZone()`, `toDateTimeZone()`)
 
 - In-package structural conversion under `Yadddl\Serializer`:
   - `StructuralSerializer` / `FactoryDeserializer` / `StructuralConverter`

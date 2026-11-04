@@ -9,6 +9,7 @@ use Yadddl\Serializer\StructuralSerializer;
 use Yadddl\Serializer\FactoryDeserializer;
 use Yadddl\ValueObject\Composite\Date;
 use Yadddl\ValueObject\Composite\DateTime;
+use Yadddl\ValueObject\Composite\DateTimeWithTimeZone;
 use Yadddl\ValueObject\Composite\Time;
 use Yadddl\ValueObject\Examples\Age;
 use Yadddl\ValueObject\Examples\Person;
@@ -16,6 +17,7 @@ use Yadddl\ValueObject\Primitive\Email;
 use Yadddl\ValueObject\Primitive\Integer;
 use Yadddl\ValueObject\Primitive\PositiveInteger;
 use Yadddl\ValueObject\Primitive\Text;
+use Yadddl\ValueObject\Primitive\TimeZone;
 
 test('round-trips simple value objects', function (string $type, mixed $input) {
     $converter = new StructuralConverter();
@@ -31,6 +33,7 @@ test('round-trips simple value objects', function (string $type, mixed $input) {
     'integer' => [Integer::class, 12],
     'positive' => [PositiveInteger::class, 0],
     'email' => [Email::class, 'user@example.com'],
+    'timezone' => [TimeZone::class, 'Europe/Rome'],
 ]);
 
 test('round-trips person composite', function () {
@@ -54,11 +57,14 @@ test('round-trips date time family via property graph', function () {
     $converter = new StructuralConverter(new StructuralSerializer(), new FactoryDeserializer());
     $date = Date::create('2024-05-06')->orFail();
     $time = Time::create('07:08:09')->orFail();
+    $timeZone = TimeZone::create('UTC')->orFail();
     $dateTime = DateTime::createFromDateAndTime($date, $time);
+    $zoned = DateTimeWithTimeZone::createFromDateTimeAndTimeZone($date, $time, $timeZone);
 
     expect($converter->fromArray($converter->toArray($date), Date::class)->equals($date))->toBeTrue()
         ->and($converter->fromArray($converter->toArray($time), Time::class)->equals($time))->toBeTrue()
-        ->and($converter->fromArray($converter->toArray($dateTime), DateTime::class)->equals($dateTime))->toBeTrue();
+        ->and($converter->fromArray($converter->toArray($dateTime), DateTime::class)->equals($dateTime))->toBeTrue()
+        ->and($converter->fromArray($converter->toArray($zoned), DateTimeWithTimeZone::class)->equals($zoned))->toBeTrue();
 });
 
 test('round-trips date time family via string defaults', function () {
@@ -66,13 +72,16 @@ test('round-trips date time family via string defaults', function () {
     $date = Date::create('2024-05-06')->orFail();
     $time = Time::create('07:08:09')->orFail();
     $dateTime = DateTime::create('2024-05-06 07:08:09')->orFail();
+    $zoned = DateTimeWithTimeZone::create('2024-05-06 07:08:09 Europe/Rome')->orFail();
 
     expect($converter->toArray($date))->toBe('2024-05-06')
         ->and($converter->fromArray('2024-05-06', Date::class)->equals($date))->toBeTrue()
         ->and($converter->toArray($time))->toBe('07:08:09')
         ->and($converter->fromArray('07:08:09', Time::class)->equals($time))->toBeTrue()
         ->and($converter->toArray($dateTime))->toBe('2024-05-06 07:08:09')
-        ->and($converter->fromArray('2024-05-06 07:08:09', DateTime::class)->equals($dateTime))->toBeTrue();
+        ->and($converter->fromArray('2024-05-06 07:08:09', DateTime::class)->equals($dateTime))->toBeTrue()
+        ->and($converter->toArray($zoned))->toBe('2024-05-06 07:08:09 Europe/Rome')
+        ->and($converter->fromArray('2024-05-06 07:08:09 Europe/Rome', DateTimeWithTimeZone::class)->equals($zoned))->toBeTrue();
 });
 
 test('round-trips nested customer graph', function () {

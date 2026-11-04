@@ -11,6 +11,7 @@ use Yadddl\Serializer\DeserializationError;
 use Yadddl\Serializer\FactoryDeserializer;
 use Yadddl\ValueObject\Composite\Date;
 use Yadddl\ValueObject\Composite\DateTime;
+use Yadddl\ValueObject\Composite\DateTimeWithTimeZone;
 use Yadddl\ValueObject\Composite\Time;
 use Yadddl\ValueObject\Error\ErrorsBag;
 use Yadddl\ValueObject\Error\MultipleFieldErrorsBag;
@@ -154,4 +155,16 @@ test('deserializes datetime from nested date and time parts', function () {
 
     expect($dateTime)->toBeInstanceOf(DateTime::class)
         ->and((string) $dateTime)->toBe('2024-01-15 08:05:09');
+});
+
+test('deserializes zoned datetime from nested parts', function () {
+    $deserializer = new FactoryDeserializer();
+    $dateTime = $deserializer->deserialize([
+        'date' => ['days' => 15, 'months' => 1, 'years' => 2024],
+        'time' => ['hours' => 8, 'minutes' => 5, 'seconds' => 9],
+        'timeZone' => 'Europe/Rome',
+    ], DateTimeWithTimeZone::class);
+
+    expect($dateTime)->toBeInstanceOf(DateTimeWithTimeZone::class)
+        ->and((string) $dateTime)->toBe('2024-01-15 08:05:09 Europe/Rome');
 });
