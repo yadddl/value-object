@@ -96,3 +96,26 @@ test('notEmpty rejects empty string with default message', function () {
     expect($context->isValid())->toBeFalse()
         ->and($context->getErrors()->getMessages()[0])->toBe('String cannot be empty');
 });
+
+test('url accepts valid urls and rejects invalid ones', function () {
+    $valid = 'https://example.com'
+        |> StringValue::from(...)
+        |> StringValue::url();
+
+    $invalid = 'notaurl'
+        |> StringValue::from(...)
+        |> StringValue::url('bad url');
+
+    expect($valid->isValid())->toBeTrue()
+        ->and($invalid->isValid())->toBeFalse()
+        ->and($invalid->getErrors()->getMessages()[0])->toBe('bad url');
+});
+
+test('url passes through when value is not a string', function () {
+    $context = 10
+        |> StringValue::from(...)
+        |> StringValue::url();
+
+    expect($context->isValid())->toBeFalse()
+        ->and($context->getErrors()->count())->toBe(1);
+});

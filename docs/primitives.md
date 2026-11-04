@@ -17,10 +17,13 @@ Every type below:
    - [Text](#text)
    - [NotEmptyText](#notemptytext)
    - [Email](#email)
+   - [Url](#url)
+   - [Uuid](#uuid)
    - [Custom text types](#custom-text-types)
 3. [Integer family](#integer-family)
    - [Integer](#integer)
    - [PositiveInteger](#positiveinteger)
+   - [StrictlyPositiveInteger](#strictlypositiveinteger)
    - [Custom ranges](#custom-ranges)
 4. [Date composites](#date-composites)
    - [Date](#date)
@@ -40,8 +43,11 @@ Every type below:
 | [Text](#text) | `string` | Matches regex `/(.+)/` | Override `REGEX` in a subclass | Yes → serialize as scalar | `toUpperCase()`, `toLowerCase()`, `equals()`, `__toString()` |
 | [NotEmptyText](#notemptytext) | `string` | Non-empty (`/.+/`) | Same as Text | Yes | Inherits Text helpers |
 | [Email](#email) | `string` | Valid email (`FILTER_VALIDATE_EMAIL`) | Prefer a custom VO if you need extra rules | Yes | `equals()`, `__toString()` |
+| [Url](#url) | `string` | Valid URL (`FILTER_VALIDATE_URL`) | Prefer a custom VO for scheme/host rules | Yes | `equals()`, `__toString()` |
+| [Uuid](#uuid) | `string` | Valid UUID via [ramsey/uuid](https://github.com/ramsey/uuid); stored lowercase | Prefer a custom VO for version/variant constraints | Yes | `generate()`, `fromRamsey()`, `toRamsey()`, `equals()`, `__toString()` |
 | [Integer](#integer) | `int` | Full `PHP_INT_MIN` … `PHP_INT_MAX` range | Override `MIN` / `MAX` | Yes | `equals()`, `__toString()` |
 | [PositiveInteger](#positiveinteger) | `int` | `MIN = 0`, `MAX = PHP_INT_MAX` | Same as Integer | Yes | Inherits Integer helpers |
+| [StrictlyPositiveInteger](#strictlypositiveinteger) | `int` | `MIN = 1`, `MAX = PHP_INT_MAX` | Same as Integer | Yes | Inherits Integer helpers |
 
 ### Date composites (`Yadddl\ValueObject\Composite`)
 
@@ -112,6 +118,42 @@ Email::create('user@example.com'); // Email|ErrorsBag
 Email::create('not-an-email');     // ErrorsBag
 ```
 
+### Url
+
+Dedicated URL VO (does not extend `Text`).
+
+| | |
+|--|--|
+| Create | `Url::create(mixed $value): Url\|ErrorsBag` |
+| Rule | `StringValue::url()` (`FILTER_VALIDATE_URL`) |
+
+```php
+use Yadddl\ValueObject\Primitive\Url;
+
+Url::create('https://example.com/path'); // Url|ErrorsBag
+Url::create('not-a-url');                // ErrorsBag
+```
+
+### Uuid
+
+UUID string VO backed by [ramsey/uuid](https://github.com/ramsey/uuid). Values are stored **lowercase**.
+
+| | |
+|--|--|
+| Create | `Uuid::create(mixed $value): Uuid\|ErrorsBag` |
+| Generate | `Uuid::generate(): Uuid` (random v4) |
+| Ramsey | `Uuid::fromRamsey(UuidInterface): Uuid`, `$uuid->toRamsey(): UuidInterface` |
+
+```php
+use Yadddl\ValueObject\Primitive\Uuid;
+
+$uuid = Uuid::create('550E8400-E29B-41D4-A716-446655440000')->orFail();
+$uuid->value; // "550e8400-e29b-41d4-a716-446655440000"
+
+$fresh = Uuid::generate();
+$ramsey = $fresh->toRamsey();
+```
+
 ### Custom text types
 
 Subclass `Text` and override `REGEX`:
@@ -163,6 +205,21 @@ use Yadddl\ValueObject\Primitive\PositiveInteger;
 PositiveInteger::create(0);   // ok
 PositiveInteger::create(10);  // ok
 PositiveInteger::create(-1);  // ErrorsBag
+```
+
+### StrictlyPositiveInteger
+
+| | |
+|--|--|
+| Extends | `Integer` |
+| Range | `MIN = 1` (zero **rejected**), `MAX = PHP_INT_MAX` |
+
+```php
+use Yadddl\ValueObject\Primitive\StrictlyPositiveInteger;
+
+StrictlyPositiveInteger::create(1);  // ok
+StrictlyPositiveInteger::create(0);  // ErrorsBag
+StrictlyPositiveInteger::create(-1); // ErrorsBag
 ```
 
 ### Custom ranges
@@ -267,7 +324,7 @@ $dt->toDateTimeImmutable();
 
 | Type | Default `StructuralSerializer` | With `StructuralConverter::create()` |
 |------|--------------------------------|--------------------------------------|
-| `Text`, `NotEmptyText`, `Email`, `Integer`, `PositiveInteger` | **scalar** (`$value`) | same |
+| `Text`, `NotEmptyText`, `Email`, `Url`, `Uuid`, `Integer`, `PositiveInteger`, `StrictlyPositiveInteger` | **scalar** (`$value`) | same |
 | `Date` | `{days, months, years}` → `createFrom` | `"Y-m-d"` → `create(string)` |
 | `Time` | `{hours, minutes, seconds}` → `createFrom` | `"H:i:s"` → `create(string)` |
 | `DateTime` | `{date: {…}, time: {…}}` → `createFromDateAndTime` | `"Y-m-d H:i:s"` → `create(string)` |
@@ -282,9 +339,12 @@ Details: [serializer.md](serializer.md).
 |------|--------|
 | Free-form non-empty string | `NotEmptyText` or `Text` |
 | Email address | `Email` |
+| HTTP(S) / absolute URL | `Url` |
+| Identifier UUID | `Uuid` (`generate()` for new ids) |
 | Domain-specific string format | Subclass `Text` + `REGEX` |
 | Any int in PHP range | `Integer` |
-| Non-negative count / amount | `PositiveInteger` |
+| Non-negative count / amount (zero ok) | `PositiveInteger` |
+| Positive count / id (zero rejected) | `StrictlyPositiveInteger` |
 | Bounded int (%, score, …) | Subclass `Integer` + `MIN`/`MAX` |
 | Calendar / clock values | `Date`, `Time`, `DateTime` |
 | Richer domain meaning (`Age`, `Money`, …) | Custom VO in your app (see [value-objects.md](value-objects.md) and `examples/`) |

@@ -67,11 +67,15 @@ When you do not need a custom type:
 
 ```php
 use Yadddl\ValueObject\Primitive\Email;
-use Yadddl\ValueObject\Primitive\PositiveInteger;
 use Yadddl\ValueObject\Primitive\NotEmptyText;
+use Yadddl\ValueObject\Primitive\StrictlyPositiveInteger;
+use Yadddl\ValueObject\Primitive\Url;
+use Yadddl\ValueObject\Primitive\Uuid;
 
 $email = Email::create('user@example.com');
-$qty = PositiveInteger::create(3);
+$url = Url::create('https://example.com');
+$id = Uuid::generate();
+$qty = StrictlyPositiveInteger::create(3);
 $name = NotEmptyText::create('Ada');
 ```
 

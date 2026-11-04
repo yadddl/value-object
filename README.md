@@ -106,7 +106,7 @@ $person = $converter->fromArray($payload, Person::class);
 | [Composites](docs/composites.md) | `MultipleValidationContext`, form errors |
 | [Validators](docs/validators.md) | `IntegerValue` / `StringValue` / `ArrayValue` API |
 | [Errors](docs/errors.md) | `ErrorsBag`, `orFail()`, entry-point mapping |
-| [Primitives & dates](docs/primitives.md) | Index + summary table of all shipped types; Text/Integer/Email/Date families |
+| [Primitives & dates](docs/primitives.md) | Index + summary table of all shipped types; Text/Integer/Email/Url/Uuid/Date families |
 | [Serializer](docs/serializer.md) | Conventions, round-trips, nested graphs |
 | [Migration from 0.8](docs/migration-from-0.8.md) | Breaking changes from YAVOL / YASL |
 | [Changelog](CHANGELOG.md) | Release notes |

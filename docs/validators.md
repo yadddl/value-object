@@ -40,6 +40,7 @@ $value
 | `notEmpty(?string $message)` | Non-empty |
 | `minLength` / `maxLength` | Length bounds |
 | `email(?string $message)` | `FILTER_VALIDATE_EMAIL` |
+| `url(?string $message)` | `FILTER_VALIDATE_URL` |
 | `hasUppercase` / `hasLowercase` / `hasNumber` / `hasSpecialCharacter` | Character classes |
 | `trim()` | Map: trim whitespace when still a string |
 | `matches(string $pattern, ?string $message)` | Regex **without** changing the value |

@@ -15,8 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `MultipleValidationContext` for composite / entity field aggregation
 - Error model: `Error`, `ErrorsBag`, `MultipleFieldErrorsBag`, `Failable`, `FailableSuccess`
 - Contract `ValidatedValue` (`public $value`) for scalar-backed VOs
-- Library primitives rewritten on pipes: `Text`, `NotEmptyText`, `Integer`, `PositiveInteger`, `Email`
+- Library primitives rewritten on pipes: `Text`, `NotEmptyText`, `Integer`, `PositiveInteger`, `StrictlyPositiveInteger`, `Email`, `Url`, `Uuid`
+- `StringValue::url()` validator (`FILTER_VALIDATE_URL`)
+- `Uuid` backed by `ramsey/uuid` (`generate()`, `fromRamsey()`, `toRamsey()`, lowercase storage)
 - Composites: `Date`, `Time`, `DateTime` returning `ErrorsBag` on failure
+
 - In-package structural conversion under `Yadddl\Serializer`:
   - `StructuralSerializer` / `FactoryDeserializer` / `StructuralConverter`
   - `ValidatedValue` serializes to a **bare scalar**

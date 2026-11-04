@@ -73,6 +73,17 @@ readonly class StringValue extends ValidationContext
         );
     }
 
+    public static function url(?string $errorMessage = null): \Closure
+    {
+        $message = $errorMessage ?? 'Invalid URL format';
+
+        return static fn (ValidationContext $context) => self::validateString(
+            $context,
+            fn (string $value) => filter_var($value, FILTER_VALIDATE_URL) !== false,
+            $message,
+        );
+    }
+
     public static function hasUppercase(?string $errorMessage = null): \Closure
     {
         $message = $errorMessage ?? 'Must contain at least one uppercase letter';
