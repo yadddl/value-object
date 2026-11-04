@@ -1,22 +1,51 @@
-[![GitHub workflow](https://github.com/yadddl/value-object/actions/workflows/php.yml/badge.svg)](https://github.com/yadddl/value-object/actions/workflows/php.yml)
+# yadddl/value-object
 
-# Yet Another DDD Library
-## Value object
+Yet Another DDD Library — Value Objects with **functional validation** (PHP 8.5 pipes) and (upcoming) structural serialize/deserialize.
 
-This library is a foundation in order to implement the [Value Object pattern](https://martinfowler.com/bliki/ValueObject.html).
+Requires **PHP 8.5+**.
 
-It helps you to introduce some DDD stuff in your projects without much effort but still in the right way. 
-It provide yoi some basic and ready to use "primitives" and a simple serializer. 
-It doesn't cover all the possibile use cases, then use it if you want, or contribute if you like what we are doing and want to expand it.
+## Principles
 
-## Usage
-> Requires PHP 8
+- If a value object instance exists, it is valid
+- Validation returns `T|ErrorsBag` (union types) — no Either monad
+- Errors accumulate; validation does not stop at the first failure
+- Domain factories (`create`) own validation; serializers must not invent rules
 
-    composer require yadddl/value-object
-> NOT YET IN PACKAGIST, COMING SOON!
+## Quick start
 
-## Documentation
-- [Core concepts](docs/core_concepts.md)
-- [Getting Started](docs/getting_started.md)
-- [Create your own value object](docs/create_your_own_value_object.md)
-- [Primitives](docs/primitives.md)
+```php
+use Yadddl\ValueObject\Validators\IntegerValue;
+use Yadddl\ValueObject\Error\ErrorsBag;
+
+readonly final class Age
+{
+    private function __construct(public int $value) {}
+
+    public static function create(mixed $value): Age|ErrorsBag
+    {
+        $context = $value
+            |> IntegerValue::from(...)
+            |> IntegerValue::min(0, 'Age cannot be negative')
+            |> IntegerValue::max(150, 'Age cannot exceed 150');
+
+        return $context->isValid()
+            ? new self($context->getValue())
+            : $context->getErrors();
+    }
+}
+```
+
+See `examples/` for `Age`, `Password`, `Person`, `Money`, and more.
+
+## Development
+
+```bash
+composer install
+composer test
+composer test-coverage   # requires Xdebug; enforces 100%
+composer psalm
+```
+
+## Migration from 0.8
+
+This is a **major** rewrite toward the functional PHP 8.5 model. Legacy constructor-throwing primitives, `factory()`/`Builder`, and Valinor are removed. Details will land in the changelog before `1.0.0`.
