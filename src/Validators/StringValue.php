@@ -130,6 +130,28 @@ readonly class StringValue extends ValidationContext
         };
     }
 
+    /**
+     * Validate against a regex without changing the string value.
+     */
+    public static function matches(string $pattern, ?string $errorMessage = null): \Closure
+    {
+        $message = $errorMessage ?? 'String does not match required pattern';
+
+        return static function (ValidationContext $context) use ($pattern, $message) {
+            if (!is_string($context->getValue())) {
+                return $context;
+            }
+
+            return $context->validate(
+                static fn (string $value): bool => $pattern !== '' && preg_match($pattern, $value) === 1,
+                $message,
+            );
+        };
+    }
+
+    /**
+     * Validate against a regex and replace the value with preg_match captures.
+     */
     public static function regex(string $pattern, ?string $errorMessage = null): \Closure
     {
         $message = $errorMessage ?? 'String does not match required pattern';
