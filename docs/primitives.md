@@ -1,40 +1,131 @@
 # Library primitives & date composites
 
-Ready-made types built on the functional validators. Use them as-is, or subclass where noted.
+Ready-made types built on the functional validators. Use them as-is, extend them with hooks (`REGEX`, `MIN` / `MAX`), or copy the pattern for your own domain types.
+
+Every type below:
+
+- is created with `create(...)` (or a dedicated factory) returning `static|ErrorsBag`
+- never exposes an invalid instance
+- supports `orFail()` via `Failable` where implemented
+
+---
+
+## Index
+
+1. [Summary table](#summary-table)
+2. [Text family](#text-family)
+   - [`Text`](#text)
+   - [`NotEmptyText`](#notemptytext)
+   - [`Email`](#email)
+   - [Custom text types](#custom-text-types)
+3. [Integer family](#integer-family)
+   - [`Integer`](#integer)
+   - [`PositiveInteger`](#positiveinteger)
+   - [Custom ranges](#custom-ranges)
+4. [Date composites](#date-composites)
+   - [`Date`](#date)
+   - [`Time`](#time)
+   - [`DateTime`](#datetime)
+5. [Serialization cheat sheet](#serialization-cheat-sheet)
+6. [Choosing a type](#choosing-a-type)
+
+---
+
+## Summary table
+
+### Scalar primitives (`Yadddl\ValueObject\Primitive`)
+
+| Type | PHP value | Constraint (default) | Extensibility | `ValidatedValue` | Useful helpers |
+|------|-----------|----------------------|---------------|------------------|----------------|
+| [`Text`](#text) | `string` | Matches `REGEX = '/(.+)/'` | Override `REGEX` in a subclass | Yes → serialize as scalar | `toUpperCase()`, `toLowerCase()`, `equals()`, `__toString()` |
+| [`NotEmptyText`](#notemptytext) | `string` | `REGEX = '/.+/` (non-empty) | Same as `Text` | Yes | Inherits `Text` helpers |
+| [`Email`](#email) | `string` | Valid email (`FILTER_VALIDATE_EMAIL`) | Prefer a custom VO if you need extra rules | Yes | `equals()`, `__toString()` |
+| [`Integer`](#integer) | `int` | `MIN…MAX` = full `PHP_INT_*` range | Override `MIN` / `MAX` | Yes | `equals()`, `__toString()` |
+| [`PositiveInteger`](#positiveinteger) | `int` | `MIN = 0`, `MAX = PHP_INT_MAX` | Same as `Integer` | Yes | Inherits `Integer` helpers |
+
+### Date composites (`Yadddl\ValueObject\Composite`)
+
+| Type | Shape | Main factories | Notes | Serialize (default / `StructuralConverter::create()`) |
+|------|-------|----------------|-------|------------------------------------------------------|
+| [`Date`](#date) | `days`, `months`, `years` | `create`, `createFrom`, `fromString`, `createFromFormat`, `now` | Strict calendar check (no `2024-02-30`) | props array / **`Y-m-d` string** |
+| [`Time`](#time) | `hours`, `minutes`, `seconds` | `create`, `createFrom`, `fromString`, `now` | `HH:MM:SS` | props array / **`H:i:s` string** |
+| [`DateTime`](#datetime) | nested `Date` + `Time` | `create`, `createFromString`, `createFromFormat`, `createFromDateAndTime`, `now` | Format `Y-m-d H:i:s` | nested props / **datetime string** |
+
+---
 
 ## Text family
 
 ### `Text`
 
-- Wraps `string` via `ValidatedValue`
-- Default regex `REGEX = '/(.+)/'` (at least one character in a capturing group)
-- `toUpperCase()` / `toLowerCase()` return new instances
-- `equals()`, `__toString()`
+General-purpose string wrapper.
+
+| | |
+|--|--|
+| Namespace | `Yadddl\ValueObject\Primitive\Text` |
+| Create | `Text::create(mixed $value): Text\|ErrorsBag` |
+| Stored as | `public string $value` |
+| Default rule | `REGEX = '/(.+)/'` — at least one character (capturing group) |
 
 ```php
+use Yadddl\ValueObject\Primitive\Text;
+
 $text = Text::create('Hello')->orFail();
-$text->toLowerCase()->value; // "hello"
+
+$text->value;                 // "Hello"
+(string) $text;               // "Hello"
+$text->toLowerCase()->value;  // "hello"
+$text->toUpperCase()->value;  // "HELLO"
+$text->equals(Text::create('Hello')->orFail()); // true
 ```
+
+Empty string fails validation with the default regex.
 
 ### `NotEmptyText`
 
-Extends `Text` with `REGEX = '/.+/`.
+Thin specialization of `Text`:
+
+| | |
+|--|--|
+| Extends | `Text` |
+| Default rule | `REGEX = '/.+/` |
+
+```php
+use Yadddl\ValueObject\Primitive\NotEmptyText;
+
+NotEmptyText::create('');     // ErrorsBag
+NotEmptyText::create('Ada');  // NotEmptyText
+```
 
 ### `Email`
 
-```php
-Email::create('user@example.com'); // Email|ErrorsBag
-```
+Dedicated email VO (does not extend `Text`).
 
-Uses `StringValue::email()`.
+| | |
+|--|--|
+| Create | `Email::create(mixed $value): Email\|ErrorsBag` |
+| Rule | `StringValue::email()` |
+
+```php
+use Yadddl\ValueObject\Primitive\Email;
+
+Email::create('user@example.com'); // Email|ErrorsBag
+Email::create('not-an-email');     // ErrorsBag
+```
 
 ### Custom text types
 
+Subclass `Text` and override `REGEX`:
+
 ```php
+use Yadddl\ValueObject\Primitive\Text;
+
 readonly class CountryCode extends Text
 {
     protected const REGEX = '/^[A-Z]{2}$/';
 }
+
+CountryCode::create('IT'); // CountryCode
+CountryCode::create('it'); // ErrorsBag
 ```
 
 ---
@@ -43,70 +134,159 @@ readonly class CountryCode extends Text
 
 ### `Integer`
 
-- `MIN = PHP_INT_MIN`, `MAX = PHP_INT_MAX` by default
-- `create(mixed): static|ErrorsBag`
-- `equals()`, `__toString()`
+| | |
+|--|--|
+| Create | `Integer::create(mixed $value): Integer\|ErrorsBag` |
+| Stored as | `public int $value` |
+| Default range | `MIN = PHP_INT_MIN`, `MAX = PHP_INT_MAX` |
+
+```php
+use Yadddl\ValueObject\Primitive\Integer;
+
+$n = Integer::create(42)->orFail();
+$n->value;     // 42
+(string) $n;   // "42"
+```
+
+Non-integers (e.g. `"42"`) fail at the `IntegerValue::from` step — no silent coercion.
 
 ### `PositiveInteger`
 
-Extends `Integer` with `MIN = 0` (zero allowed).
+| | |
+|--|--|
+| Extends | `Integer` |
+| Range | `MIN = 0` (zero **allowed**), `MAX = PHP_INT_MAX` |
+
+```php
+use Yadddl\ValueObject\Primitive\PositiveInteger;
+
+PositiveInteger::create(0);   // ok
+PositiveInteger::create(10);  // ok
+PositiveInteger::create(-1);  // ErrorsBag
+```
 
 ### Custom ranges
 
 ```php
+use Yadddl\ValueObject\Primitive\Integer;
+
 readonly class Percentage extends Integer
 {
     protected const MIN = 0;
     protected const MAX = 100;
 }
+
+Percentage::create(50);  // Percentage
+Percentage::create(101); // ErrorsBag
 ```
 
 ---
 
 ## Date composites
 
-Namespace `Yadddl\ValueObject\Composite`.
+Namespace: `Yadddl\ValueObject\Composite`.
+
+These are **not** `ValidatedValue` scalars: they expose structured public properties (or nest other composites). Prefer string serialization via `StructuralConverter::create()` when round-tripping through `create(string)`.
 
 ### `Date`
 
-```php
-Date::create('2024-01-15');           // from Y-m-d string
-Date::createFrom(15, 1, 2024);        // day, month, year
-Date::create($dateTimeImmutable);
-Date::now();
+Calendar date (`Y-m-d`).
 
+| Factory | Input | Result |
+|---------|-------|--------|
+| `create(string\|Date\|DateTimeInterface)` | string / self / native datetime | `Date\|ErrorsBag` |
+| `createFrom(int $days, int $months, int $years)` | parts | `Date\|ErrorsBag` |
+| `fromString` / `createFromFormat` | formatted string | `Date\|ErrorsBag` |
+| `now()` | — | `Date` (always valid “today”) |
+| `createFromDateTimeInterface` | `DateTimeInterface` | `Date` |
+
+```php
+use Yadddl\ValueObject\Composite\Date;
+
+$date = Date::create('2024-01-15')->orFail();
+
+$date->years;   // 2024
+$date->months;  // 1
+$date->days;    // 15
+(string) $date; // "2024-01-15"
 $date->format('d/m/Y');
 $date->toDateTimeImmutable();
-$date->equals($other);
-(string) $date; // 2024-01-15
-```
+$date->equals(Date::createFrom(15, 1, 2024)->orFail());
 
-Invalid calendar dates (e.g. `2024-02-30`) return `ErrorsBag` (strict round-trip parsing).
+Date::create('2024-02-30'); // ErrorsBag — strict calendar
+```
 
 ### `Time`
 
+Clock time (`H:i:s`).
+
+| Factory | Input |
+|---------|-------|
+| `create` / `fromString` | `"08:05:09"` |
+| `createFrom(int $hours, int $minutes, int $seconds)` | parts |
+| `now()` / `createFromDateTimeInterface` | clock / native |
+
 ```php
-Time::create('08:05:09');
-Time::createFrom(8, 5, 9);
-Time::now();
+use Yadddl\ValueObject\Composite\Time;
+
+$time = Time::create('08:05:09')->orFail();
+(string) $time; // "08:05:09"
+$time->toInt(); // 80509
 ```
 
 ### `DateTime`
 
-```php
-DateTime::create('2024-01-15 08:05:09');
-DateTime::createFromDateAndTime($date, $time);
-DateTime::now();
+Pair of `Date` + `Time`.
 
-$dateTime->format('Y-m-d H:i');
-$dateTime->toDateTimeImmutable();
+| Factory | Input |
+|---------|-------|
+| `create(string\|DateTimeInterface\|DateTime)` | `"Y-m-d H:i:s"` / native / self |
+| `createFromDateAndTime(Date, Time)` | nested VOs |
+| `createFromString` / `createFromFormat` | formatted string |
+| `now()` | current instant |
+
+```php
+use Yadddl\ValueObject\Composite\Date;
+use Yadddl\ValueObject\Composite\DateTime;
+use Yadddl\ValueObject\Composite\Time;
+
+$dt = DateTime::create('2024-01-15 08:05:09')->orFail();
+$dt = DateTime::createFromDateAndTime(
+    Date::create('2024-01-15')->orFail(),
+    Time::create('08:05:09')->orFail(),
+);
+
+(string) $dt; // "2024-01-15 08:05:09"
+$dt->format('Y-m-d H:i');
+$dt->toDateTimeImmutable();
 ```
 
 ---
 
-## Serialization tip
+## Serialization cheat sheet
 
-- `Text` / `Integer` / `Email` implement `ValidatedValue` → serializer emits **scalars**
-- `Date` / `Time` / `DateTime` expose multiple public properties by default; use `StructuralConverter::create()` to emit **strings** for natural `create(string)` round-trips
+| Type | Default `StructuralSerializer` | With `StructuralConverter::create()` |
+|------|--------------------------------|--------------------------------------|
+| `Text`, `NotEmptyText`, `Email`, `Integer`, `PositiveInteger` | **scalar** (`$value`) | same |
+| `Date` | `{days, months, years}` → `createFrom` | `"Y-m-d"` → `create(string)` |
+| `Time` | `{hours, minutes, seconds}` → `createFrom` | `"H:i:s"` → `create(string)` |
+| `DateTime` | `{date: {…}, time: {…}}` → `createFromDateAndTime` | `"Y-m-d H:i:s"` → `create(string)` |
 
-See [serializer.md](serializer.md).
+Details: [serializer.md](serializer.md).
+
+---
+
+## Choosing a type
+
+| Need | Prefer |
+|------|--------|
+| Free-form non-empty string | `NotEmptyText` or `Text` |
+| Email address | `Email` |
+| Domain-specific string format | Subclass `Text` + `REGEX` |
+| Any int in PHP range | `Integer` |
+| Non-negative count / amount | `PositiveInteger` |
+| Bounded int (%, score, …) | Subclass `Integer` + `MIN`/`MAX` |
+| Calendar / clock values | `Date`, `Time`, `DateTime` |
+| Richer domain meaning (`Age`, `Money`, …) | Custom VO in your app (see [value-objects.md](value-objects.md) and `examples/`) |
+
+Library primitives are **building blocks**. Prefer a named domain VO when the concept carries business language beyond “string” or “int”.
