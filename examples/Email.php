@@ -1,0 +1,36 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Yadddl\ValueObject\Examples;
+
+use Yadddl\ValueObject\Contracts\ValidatedValue;
+use Yadddl\ValueObject\Error\ErrorsBag;
+use Yadddl\ValueObject\Error\Failable;
+use Yadddl\ValueObject\Error\FailableSuccess;
+use Yadddl\ValueObject\Validators\StringValue;
+
+final readonly class Email implements Failable, ValidatedValue
+{
+    use FailableSuccess;
+
+    private function __construct(public string $value)
+    {
+    }
+
+    public static function create(mixed $value): Email|ErrorsBag
+    {
+        $context = Email::validate($value);
+
+        return $context->isValid()
+            ? new Email($context->getValue())
+            : $context->getErrors();
+    }
+
+    public static function validate(mixed $value): StringValue
+    {
+        return $value
+                |> StringValue::from(...)
+                |> StringValue::email("Invalid email format");
+    }
+}
