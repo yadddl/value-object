@@ -20,7 +20,8 @@
   },
   "autoload": {
     "psr-4": {
-      "Yadddl\\ValueObject\\": "src/"
+      "Yadddl\\ValueObject\\": "src/",
+      "Yadddl\\Serializer\\": "serializer/"
     }
   },
   "autoload-dev": {

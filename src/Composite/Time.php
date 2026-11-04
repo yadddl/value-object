@@ -26,6 +26,11 @@ final readonly class Time implements Failable, \Stringable
         return self::fromString($time);
     }
 
+    public static function createFrom(int $hours, int $minutes, int $seconds): self|ErrorsBag
+    {
+        return self::fromString(sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds));
+    }
+
     public static function fromString(string $time): self|ErrorsBag
     {
         if (preg_match('/^([01]?\d|2[0-3]):([0-5]\d):([0-5]\d)$/', $time, $matches) !== 1) {

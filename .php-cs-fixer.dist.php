@@ -3,7 +3,8 @@
 declare(strict_types=1);
 
 $finder = (new PhpCsFixer\Finder())
-    ->in(__DIR__.'/src');
+    ->in(__DIR__.'/src')
+    ->in(__DIR__.'/serializer');
 
 if (is_dir(__DIR__.'/examples')) {
     $finder->in(__DIR__.'/examples');

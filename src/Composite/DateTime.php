@@ -36,6 +36,11 @@ final readonly class DateTime implements Failable, \Stringable
         };
     }
 
+    public static function createFromDateAndTime(Date $date, Time $time): self
+    {
+        return new self($date, $time);
+    }
+
     public static function createFromDateTimeInterface(DateTimeInterface $dateTime): self
     {
         return new self(
