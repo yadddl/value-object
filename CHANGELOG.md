@@ -5,6 +5,20 @@ All notable changes to `yadddl/value-object` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] — 2026-11-05
+
+### Added
+
+- `BackedEnumValue::create(class-string, mixed): BackedEnum|ErrorsBag` for domain validation of string/int-backed enums (no throw on invalid input)
+- `MultipleValidationContext` accepts successful `BackedEnum` results and **keeps the enum instance** (does not unwrap to the backing scalar)
+- Domain exception hierarchy: `DomainException` → `ValidationFailedException` / `DomainLogicException`
+- Examples: `OrderStatus` / `Order` showing backed enums in `MultipleValidationContext`
+
+### Changed
+
+- `ErrorsBag::orFail()` / `MultipleFieldErrorsBag::orFail()` throw `ValidationFailedException` (bag via `getErrors()`) instead of `\InvalidArgumentException`
+  — catch `DomainException` / `ValidationFailedException` at boundaries for 422 vs other statuses
+
 ## [1.0.0] — 2026-11-05
 
 ### Added

@@ -2,8 +2,10 @@
 
 declare(strict_types=1);
 
+use Yadddl\ValueObject\Error\DomainException;
 use Yadddl\ValueObject\Error\Error;
 use Yadddl\ValueObject\Error\ErrorsBag;
+use Yadddl\ValueObject\Error\ValidationFailedException;
 
 test('empty bag has no errors', function () {
     $bag = ErrorsBag::empty();
@@ -42,9 +44,15 @@ test('string representation joins messages', function () {
     expect((string) $bag)->toBe('alpha; beta');
 });
 
-test('orFail throws invalid argument with messages', function () {
+test('orFail throws ValidationFailedException with messages', function () {
     $bag = ErrorsBag::fromMessages('boom');
 
-    expect(fn () => $bag->orFail())
-        ->toThrow(InvalidArgumentException::class, 'boom');
+    try {
+        $bag->orFail();
+        expect(false)->toBeTrue();
+    } catch (ValidationFailedException $exception) {
+        expect($exception)->toBeInstanceOf(DomainException::class)
+            ->and($exception->getMessage())->toBe('boom')
+            ->and($exception->getErrors())->toBe($bag);
+    }
 });

@@ -41,7 +41,7 @@ if ($result instanceof Age) {
 }
 
 // When exceptions are desired at the boundary:
-$age = Age::create($input)->orFail(); // throws InvalidArgumentException
+$age = Age::create($input)->orFail(); // throws ValidationFailedException (DomainException)
 ```
 
 ### Checklist

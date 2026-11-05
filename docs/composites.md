@@ -38,7 +38,24 @@ readonly final class Person implements Failable
 
 Named arguments to `setup()` become **field names** in `MultipleFieldErrorsBag`.
 
-`getValues()` returns successful primitives keyed by those names (from `ValidatedValue::$value`), ready to spread into the constructor.
+Accepted successful results:
+
+| Input | Stored in `getValues()` |
+|-------|-------------------------|
+| `ValidatedValue` | `$result->value` (primitive unwrap) |
+| `BackedEnum` (e.g. from `BackedEnumValue::create`) | the **enum instance** |
+| `ErrorsBag` | field errors (value omitted) |
+
+```php
+use Yadddl\ValueObject\Validators\BackedEnumValue;
+
+$context = MultipleValidationContext::setup(
+    status: BackedEnumValue::create(ListingStatus::class, $raw),
+    name: Name::create($name),
+);
+
+// getValues()['status'] is ListingStatus::Published, not 'published'
+```
 
 ## Handling field errors (e.g. HTTP / forms)
 
@@ -63,7 +80,7 @@ Helpers:
 - `getErrorsForField('email')`
 - `getFieldsWithErrors()`
 - `getAllMessages()` (flat)
-- `orFail()` — throw with `[field] message` formatting
+- `orFail()` — throws `ValidationFailedException` with `[field] message` formatting
 
 ## Nested graphs
 

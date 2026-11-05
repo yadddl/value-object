@@ -109,6 +109,6 @@ final readonly class ErrorsBag implements Failable
     #[\Override]
     public function orFail(): never
     {
-        throw new \InvalidArgumentException((string) $this);
+        throw new ValidationFailedException($this);
     }
 }

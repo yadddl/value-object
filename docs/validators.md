@@ -71,6 +71,47 @@ Non-array contexts pass through map/validate steps unchanged (so earlier type er
 
 ---
 
+## `BackedEnumValue`
+
+Domain helper for **backed** enums (`string` or `int`). Returns `BackedEnum|ErrorsBag` — no exceptions on the validation path.
+
+| Method | Role |
+|--------|------|
+| `create(class-string<BackedEnum>, mixed $value, ?string $invalidMessage)` | Resolve case from backing value, or pass through an existing case |
+
+```php
+use Yadddl\ValueObject\Validators\BackedEnumValue;
+
+enum ListingStatus: string
+{
+    case Published = 'published';
+    case Draft = 'draft';
+}
+
+$status = BackedEnumValue::create(ListingStatus::class, $raw);
+// ListingStatus|ErrorsBag
+
+// Already a case → returned as-is
+BackedEnumValue::create(ListingStatus::class, ListingStatus::Draft);
+
+// Custom message
+BackedEnumValue::create(ListingStatus::class, $raw, 'Unknown listing status');
+```
+
+Works with `MultipleValidationContext` — on success the field value is the **enum instance**, not the backing scalar:
+
+```php
+$context = MultipleValidationContext::setup(
+    status: BackedEnumValue::create(ListingStatus::class, $status),
+    // …
+);
+// $context->getValues()['status'] instanceof ListingStatus
+```
+
+Domain methods (`isPublished()`, …) stay on your enum. Unit (non-backed) enums are not supported here — use the serializer’s throw-based path for those at infrastructure boundaries.
+
+---
+
 ## `ValidationContext` utilities
 
 Available on any context in the pipe:
@@ -90,4 +131,4 @@ Available on any context in the pipe:
 
 ## `MultipleValidationContext`
 
-See [composites.md](composites.md). Aggregates `ValidatedValue|ErrorsBag` results by field name.
+See [composites.md](composites.md). Aggregates `ValidatedValue|BackedEnum|ErrorsBag` results by field name.

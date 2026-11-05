@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use Tests\Serializer\Fixtures\Color;
 use Tests\Support\SampleAge;
 use Tests\Support\SampleName;
 use Yadddl\ValueObject\Error\MultipleFieldErrorsBag;
+use Yadddl\ValueObject\Validators\BackedEnumValue;
 use Yadddl\ValueObject\Validators\MultipleValidationContext;
 
 test('creates context with all valid values', function () {
@@ -64,5 +66,26 @@ test('can get errors for specific field', function () {
 
 test('setup rejects unexpected result types', function () {
     expect(fn () => MultipleValidationContext::setup(name: 'raw-string'))
-        ->toThrow(InvalidArgumentException::class, 'Expected ErrorsBag or ValidatedValue for field "name"');
+        ->toThrow(InvalidArgumentException::class, 'Expected ErrorsBag, ValidatedValue, or BackedEnum for field "name"');
+});
+
+test('keeps BackedEnum instances without unwrapping to backing value', function () {
+    $context = MultipleValidationContext::setup(
+        name: SampleName::create('John Doe'),
+        color: BackedEnumValue::create(Color::class, 'blue'),
+    );
+
+    expect($context->isValid())->toBeTrue()
+        ->and($context->getValues()['color'])->toBe(Color::Blue)
+        ->and($context->getValues()['name'])->toBe('John Doe');
+});
+
+test('collects BackedEnumValue errors by field', function () {
+    $context = MultipleValidationContext::setup(
+        color: BackedEnumValue::create(Color::class, 'green'),
+    );
+
+    expect($context->isValid())->toBeFalse()
+        ->and($context->getValues())->not->toHaveKey('color')
+        ->and($context->getErrors()->getFieldsWithErrors())->toContain('color');
 });

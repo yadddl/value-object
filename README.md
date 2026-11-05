@@ -80,6 +80,27 @@ return $context->isValid()
     : $context->getErrors(); // MultipleFieldErrorsBag
 ```
 
+### Backed enums in the validation pipeline
+
+```php
+use Yadddl\ValueObject\Validators\BackedEnumValue;
+
+enum ListingStatus: string
+{
+    case Published = 'published';
+    case Draft = 'draft';
+}
+
+$status = BackedEnumValue::create(ListingStatus::class, $raw);
+// ListingStatus|ErrorsBag — no throw on invalid input
+
+$context = MultipleValidationContext::setup(
+    status: $status,
+    // …
+);
+// On success, getValues()['status'] is the enum case (not the backing string)
+```
+
 ### Serialize / deserialize
 
 ```php
@@ -104,8 +125,8 @@ $person = $converter->fromArray($payload, Person::class);
 | [Getting started](docs/getting-started.md) | Install, first VO, primitives, converter |
 | [Building value objects](docs/value-objects.md) | Canonical shape, password-like rules, examples |
 | [Composites](docs/composites.md) | `MultipleValidationContext`, form errors |
-| [Validators](docs/validators.md) | `IntegerValue` / `StringValue` / `ArrayValue` API |
-| [Errors](docs/errors.md) | `ErrorsBag`, `orFail()`, entry-point mapping |
+| [Validators](docs/validators.md) | `IntegerValue` / `StringValue` / `ArrayValue` / `BackedEnumValue` API |
+| [Errors](docs/errors.md) | `ErrorsBag`, `DomainException`, `orFail()`, entry-point mapping |
 | [Primitives & dates](docs/primitives.md) | Index + summary table of all shipped types; Text/Integer/Email/Url/Uuid/Date families |
 | [Serializer](docs/serializer.md) | Conventions, round-trips, nested graphs |
 | [Migration from 0.8](docs/migration-from-0.8.md) | Breaking changes from YAVOL / YASL |

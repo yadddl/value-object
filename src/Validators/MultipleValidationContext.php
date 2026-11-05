@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Yadddl\ValueObject\Validators;
 
+use BackedEnum;
 use Yadddl\ValueObject\Contracts\ValidatedValue;
 use Yadddl\ValueObject\Error\ErrorsBag;
 use Yadddl\ValueObject\Error\MultipleFieldErrorsBag;
@@ -25,10 +26,13 @@ readonly class MultipleValidationContext
     }
 
     /**
-     * Setup validation context from multiple ValueObject|ErrorsBag results
-     * Each named argument should be the result of a ValueObject::create() call
+     * Setup validation context from multiple ValueObject|ErrorsBag|BackedEnum results
+     * Each named argument should be the result of a ValueObject::create() or {@see BackedEnumValue::create()} call
      *
-     * @param mixed ...$results Named arguments: fieldName => (ValueObject|ErrorsBag)
+     * Successful {@see ValidatedValue} results unwrap to `$result->value`.
+     * Successful {@see BackedEnum} results are kept as the enum instance.
+     *
+     * @param mixed ...$results Named arguments: fieldName => (ValidatedValue|BackedEnum|ErrorsBag)
      * @return static
      */
     public static function setup(...$results): static
@@ -41,9 +45,11 @@ readonly class MultipleValidationContext
                 $errorsByField[$fieldName] = $result->getErrors();
             } elseif ($result instanceof ValidatedValue) {
                 $values[$fieldName] = $result->value;
+            } elseif ($result instanceof BackedEnum) {
+                $values[$fieldName] = $result;
             } else {
                 throw new \InvalidArgumentException(sprintf(
-                    'Expected ErrorsBag or ValidatedValue for field "%s", got %s',
+                    'Expected ErrorsBag, ValidatedValue, or BackedEnum for field "%s", got %s',
                     (string) $fieldName,
                     get_debug_type($result),
                 ));

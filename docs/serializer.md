@@ -36,6 +36,8 @@ $deserializer->deserialize($data, Type::class);
 | `ValidatedValue` | bare `$value` (recursively serialized) |
 | `BackedEnum` | backing value |
 | `UnitEnum` | case name |
+
+Deserialize of enums remains **throw-oriented** (`DeserializationError` / `ValueError`) for infrastructure boundaries. For domain validation that returns `BackedEnum|ErrorsBag`, use [`BackedEnumValue::create`](validators.md#backedenumvalue) instead.
 | object | public instance properties → assoc array (recursive) |
 | `array` / `Traversable` | array, **keys preserved** |
 
