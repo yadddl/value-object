@@ -332,7 +332,7 @@ Use this when the wall-clock value has **no** timezone meaning (or the zone live
 | `create(string\|DateTimeInterface\|DateTimeWithTimeZone)` | `"2024-01-15 08:05:09 Europe/Rome"` / native / self |
 | `createFromDateTimeAndTimeZone(Date, Time, TimeZone)` | nested VOs |
 | `createFromString` / `createFromFormat` | formatted string |
-| `now(string\|\DateTimeZone\|TimeZone\|null)` | current instant in the given (or default) zone |
+| `now(string\|\DateTimeZone\|TimeZone\|null)` | current instant in the given (or default) zone; returns `ErrorsBag` if the zone is invalid |
 
 ```php
 use Yadddl\ValueObject\Composite\DateTimeWithTimeZone;

@@ -25,9 +25,13 @@ final readonly class DateTimeWithTimeZone implements Failable, \Stringable
     ) {
     }
 
-    public static function now(string|NativeTimeZone|TimeZone|null $timeZone = null): self
+    public static function now(string|NativeTimeZone|TimeZone|null $timeZone = null): self|ErrorsBag
     {
         $zone = self::resolveTimeZone($timeZone ?? date_default_timezone_get());
+
+        if ($zone instanceof ErrorsBag) {
+            return $zone;
+        }
 
         return self::createFromDateTimeInterface(new DateTimeImmutable('now', $zone->toDateTimeZone()));
     }
@@ -46,9 +50,13 @@ final readonly class DateTimeWithTimeZone implements Failable, \Stringable
         return new self($date, $time, $timeZone);
     }
 
-    public static function createFromDateTimeInterface(DateTimeInterface $dateTime): self
+    public static function createFromDateTimeInterface(DateTimeInterface $dateTime): self|ErrorsBag
     {
-        $nativeZone = $dateTime->getTimezone() ?: new NativeTimeZone('UTC');
+        $nativeZone = $dateTime->getTimezone();
+
+        if ($nativeZone === false) {
+            return ErrorsBag::fromMessages('DateTimeInterface has no timezone');
+        }
 
         return new self(
             Date::createFromDateTimeInterface($dateTime),
@@ -65,8 +73,12 @@ final readonly class DateTimeWithTimeZone implements Failable, \Stringable
     public static function createFromFormat(string $dateTimeString, string $format): self|ErrorsBag
     {
         $dateTime = DateTimeImmutable::createFromFormat('!'.$format, $dateTimeString);
+        $errors = DateTimeImmutable::getLastErrors();
 
-        if ($dateTime === false || $dateTime->format($format) !== $dateTimeString) {
+        if (
+            $dateTime === false
+            || ($errors !== false && (($errors['warning_count'] ?? 0) > 0 || ($errors['error_count'] ?? 0) > 0))
+        ) {
             return ErrorsBag::fromMessages("Invalid date time '{$dateTimeString}' provided for the format '{$format}'");
         }
 
@@ -113,12 +125,12 @@ final readonly class DateTimeWithTimeZone implements Failable, \Stringable
         return "{$this->date} {$this->time} {$this->timeZone}";
     }
 
-    private static function resolveTimeZone(string|NativeTimeZone|TimeZone $timeZone): TimeZone
+    private static function resolveTimeZone(string|NativeTimeZone|TimeZone $timeZone): TimeZone|ErrorsBag
     {
         return match (true) {
             $timeZone instanceof TimeZone => $timeZone,
             $timeZone instanceof NativeTimeZone => TimeZone::fromDateTimeZone($timeZone),
-            default => TimeZone::create($timeZone)->orFail(),
+            default => TimeZone::create($timeZone),
         };
     }
 }
