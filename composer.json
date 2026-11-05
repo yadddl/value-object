@@ -1,6 +1,7 @@
 {
   "name": "yadddl/value-object",
-  "description": "Yet another Value Object library",
+  "description": "Yet another Value Object library — functional validation (PHP 8.5 pipes) and structural serialize/deserialize",
+  "type": "library",
   "minimum-stability": "stable",
   "license": "MIT",
   "authors": [
@@ -10,45 +11,36 @@
     }
   ],
   "require": {
-    "php": ">=8.2",
-    "cuyz/valinor": "^1.6"
+    "php": "^8.5",
+    "ramsey/uuid": "^4.7"
   },
   "require-dev": {
-    "vimeo/psalm": "^5.9",
+    "vimeo/psalm": "^6.0",
     "friendsofphp/php-cs-fixer": "^3.16",
-    "jetbrains/phpstorm-attributes": "^1.0",
-    "phpstan/phpstan": "^1.10",
-    "pestphp/pest": "^2.5"
+    "pestphp/pest": "^4.1"
   },
   "autoload": {
     "psr-4": {
-      "Yadddl\\ValueObject\\": "src/"
-    },
-    "files": [
-      "src/helpers.php"
-    ]
+      "Yadddl\\ValueObject\\": "src/",
+      "Yadddl\\Serializer\\": "serializer/"
+    }
   },
   "autoload-dev": {
     "psr-4": {
-      "Yadddl\\ValueObject\\": "tests/",
-      "Yadddl\\ValueObject\\Examples\\": "examples/"
+      "Yadddl\\ValueObject\\Examples\\": "examples/",
+      "Tests\\": "tests/"
     }
-  },
-  "suggest": {
-    "yadddl/serializer": "In order to serialize the objects"
   },
   "scripts": {
     "test": "pest",
-    "test-with-coverage": "phpunit --coverage-clover clover.xml ",
-    "phpstan": "phpstan",
+    "test-coverage": "XDEBUG_MODE=coverage pest --coverage --min=100",
     "psalm": "psalm",
-    "cs-check": "php-cs-fixer fix --dry-run --diff src/",
-    "cs-fix": "php-cs-fixer fix --diff src/",
+    "cs-check": "php-cs-fixer fix --dry-run --diff",
+    "cs-fix": "php-cs-fixer fix --diff",
     "test:all": [
       "@cs-check",
-      "@phpstan",
       "@psalm",
-      "@test"
+      "@test-coverage"
     ]
   },
   "config": {

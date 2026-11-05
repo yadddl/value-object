@@ -4,31 +4,35 @@ declare(strict_types=1);
 
 namespace Yadddl\ValueObject\Examples;
 
-use Yadddl\ValueObject\Error\ValidationError;
-use ReflectionException;
-use function Yadddl\ValueObject\factory;
+use Yadddl\ValueObject\Error\Failable;
+use Yadddl\ValueObject\Error\FailableSuccess;
+use Yadddl\ValueObject\Error\MultipleFieldErrorsBag;
+use Yadddl\ValueObject\Validators\MultipleValidationContext;
 
-final class Person
+final readonly class Person implements Failable
 {
-    private function __construct(private Name $name, private Age $age)
-    {
+    use FailableSuccess;
+
+    private function __construct(
+        public string $name,
+        public string $email,
+        public int $age,
+    ) {
     }
 
-    public function getName(): Name
-    {
-        return $this->name;
-    }
+    public static function create(
+        string $name,
+        string $email,
+        int $age,
+    ): Person|MultipleFieldErrorsBag {
+        $context = MultipleValidationContext::setup(
+            name: Name::create($name),
+            email: Email::create($email),
+            age: Age::create($age),
+        );
 
-    public function getAge(): Age
-    {
-        return $this->age;
-    }
-
-    /**
-     * @throws ReflectionException
-     */
-    public static function create(string|Name $name, int|Age $age): Person|ValidationError
-    {
-        return factory(__CLASS__, Name::create($name), Age::create($age));
+        return $context->isValid()
+            ? new Person(...$context->getValues())
+            : $context->getErrors();
     }
 }

@@ -4,26 +4,40 @@ declare(strict_types=1);
 
 namespace Yadddl\ValueObject\Primitive;
 
-use phpDocumentor\Reflection\Types\Static_;
-use Yadddl\ValueObject\Error\InvalidString;
-use Yadddl\ValueObject\Error\InvalidValueObject;
+use Yadddl\ValueObject\Contracts\ValidatedValue;
+use Yadddl\ValueObject\Error\ErrorsBag;
+use Yadddl\ValueObject\Error\Failable;
+use Yadddl\ValueObject\Error\FailableSuccess;
+use Yadddl\ValueObject\Validators\StringValue;
 
-use function preg_match;
-
-readonly class Text
+readonly class Text implements Failable, ValidatedValue, \Stringable
 {
-    /** @var string  */
+    use FailableSuccess;
+
+    /** @var non-empty-string */
     protected const REGEX = '/(.+)/';
 
-    final public function __construct(public string $value)
+    final private function __construct(public string $value)
     {
-        $this->validate($value);
     }
 
-
-    public function __toString(): string
+    public static function create(mixed $value): static|ErrorsBag
     {
-        return $this->value;
+        $context = static::validate($value);
+
+        return $context->isValid()
+            ? new static($context->getValue())
+            : $context->getErrors();
+    }
+
+    public static function validate(mixed $value): StringValue
+    {
+        /** @var non-empty-string $regex */
+        $regex = static::REGEX;
+
+        return $value
+            |> StringValue::from(...)
+            |> StringValue::matches($regex, sprintf("Invalid string: value does not match '%s'", $regex));
     }
 
     public function toUpperCase(): static
@@ -36,22 +50,14 @@ readonly class Text
         return new static(strtolower($this->value));
     }
 
-    /**
-     * @throws InvalidString
-     */
-    protected function validate(string $value): void
+    public function equals(self $other): bool
     {
-        /** @psalm-var non-empty-string $regex
-         */
-        $regex = static::REGEX;
-
-        if (preg_match($regex, $value) !== 1) {
-            throw new InvalidString("Invalid string: '{$value}' does not match with '{$regex}'", 'value');
-        }
+        return $other instanceof static && $other->value === $this->value;
     }
 
-    public function equals(Text $object): bool
+    #[\Override]
+    public function __toString(): string
     {
-        return $object->value === $this->value;
+        return $this->value;
     }
 }

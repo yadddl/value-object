@@ -6,67 +6,69 @@ namespace Yadddl\ValueObject\Composite;
 
 use DateTimeImmutable;
 use DateTimeInterface;
-use JetBrains\PhpStorm\Pure;
-use Yadddl\ValueObject\Error\InvalidValueObject;
+use Yadddl\ValueObject\Error\ErrorsBag;
+use Yadddl\ValueObject\Error\Failable;
+use Yadddl\ValueObject\Error\FailableSuccess;
 
-readonly class Time implements \Stringable
+final readonly class Time implements Failable, \Stringable
 {
+    use FailableSuccess;
+
     private function __construct(
         public int $hours,
         public int $minutes,
-        public int $seconds
+        public int $seconds,
     ) {
     }
 
-    public static function create(string $time): Time|InvalidValueObject
+    public static function create(string $time): self|ErrorsBag
     {
-        return Time::fromString($time);
+        return self::fromString($time);
     }
 
-    public static function fromString(string $time): Time|InvalidValueObject
+    public static function createFrom(int $hours, int $minutes, int $seconds): self|ErrorsBag
     {
-        if (!preg_match('/^([0-1]?[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$/', $time, $matches)) {
-            return new InvalidValueObject("Invalid time provided: '{$time}'");
+        return self::fromString(sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds));
+    }
+
+    public static function fromString(string $time): self|ErrorsBag
+    {
+        if (preg_match('/^([01]?\d|2[0-3]):([0-5]\d):([0-5]\d)$/', $time, $matches) !== 1) {
+            return ErrorsBag::fromMessages("Invalid time provided: '{$time}'");
         }
 
-        [, $hours, $minutes, $seconds] = $matches;
-
-        return new Time((int)$hours, (int)$minutes, (int)$seconds);
+        return new self((int) $matches[1], (int) $matches[2], (int) $matches[3]);
     }
 
-    public static function now(): Time
+    public static function now(): self
     {
         return self::createFromDateTimeInterface(new DateTimeImmutable());
     }
 
-    public static function createFromDateTimeInterface(DateTimeInterface $date): Time
+    public static function createFromDateTimeInterface(DateTimeInterface $date): self
     {
-        $hours = (int)$date->format('H');
-        $minutes = (int)$date->format('i');
-        $seconds = (int)$date->format('s');
-
-        return new Time($hours, $minutes, $seconds);
+        return new self(
+            (int) $date->format('H'),
+            (int) $date->format('i'),
+            (int) $date->format('s'),
+        );
     }
 
-    #[Pure] public function __toString(): string
+    public function toInt(): int
     {
-        return self::toString($this->hours, $this->minutes, $this->seconds);
+        return (int) sprintf('%02d%02d%02d', $this->hours, $this->minutes, $this->seconds);
     }
 
-    #[Pure] private static function toString(int $hours, int $minutes, int $seconds): string
+    public function equals(self $other): bool
     {
-        return \sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
+        return $this->hours === $other->hours
+            && $this->minutes === $other->minutes
+            && $this->seconds === $other->seconds;
     }
 
-    #[Pure] public function toInt(): int
+    #[\Override]
+    public function __toString(): string
     {
-        return (int)sprintf('%02d%02d%02d', $this->hours, $this->minutes, $this->seconds);
-    }
-
-    #[Pure] public function equalsTo(Time $time): bool
-    {
-        return $this->hours === $time->hours
-            && $this->minutes === $time->minutes
-            && $this->seconds === $time->seconds;
+        return sprintf('%02d:%02d:%02d', $this->hours, $this->minutes, $this->seconds);
     }
 }

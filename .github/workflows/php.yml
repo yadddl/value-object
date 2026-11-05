@@ -1,32 +1,33 @@
-name: PHP Composer
+name: CI
 
-on: push
+on:
+  push:
+  pull_request:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.2
-      - name: Validate composer.json and composer.lock
-        run: composer validate
-      - name: Cache Composer packages
-        id: composer-cache
-        uses: actions/cache@v2
-        with:
-          path: vendor
-          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-php-
+          php-version: '8.5'
+          coverage: xdebug
+          tools: composer
+
+      - name: Validate composer.json
+        run: composer validate --no-check-publish
+
       - name: Install dependencies
-        if: steps.composer-cache.outputs.cache-hit != 'true'
-        run: composer install --prefer-dist --no-progress --no-suggest
-      - name: Run test suite
-        run: composer run test
-      - name: Run code sniffer check
-        run: composer run cs-check
-      - name: Run psalm
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Run tests with 100% coverage
+        run: composer run test-coverage
+
+      - name: Run Psalm
         run: composer run psalm
+
+      - name: Run CS check
+        run: composer run cs-check

@@ -4,41 +4,34 @@ declare(strict_types=1);
 
 namespace Yadddl\ValueObject\Examples;
 
-use Yadddl\ValueObject\Error\InvalidValueObject;
-use JetBrains\PhpStorm\Pure;
-use Stringable;
+use Yadddl\ValueObject\Contracts\ValidatedValue;
+use Yadddl\ValueObject\Error\ErrorsBag;
+use Yadddl\ValueObject\Error\Failable;
+use Yadddl\ValueObject\Error\FailableSuccess;
+use Yadddl\ValueObject\Validators\StringValue;
 
-class Name implements Stringable
+final readonly class Name implements Failable, ValidatedValue
 {
-    private string $name;
+    use FailableSuccess;
 
-    private function __construct(string $name)
+    private function __construct(public string $value)
     {
-        $this->name = $name;
     }
 
-    public function __toString(): string
+    public static function create(mixed $value): Name|ErrorsBag
     {
-        return $this->name;
+        $context = Name::validate($value);
+
+        return $context->isValid()
+            ? new Name($context->getValue())
+            : $context->getErrors();
     }
 
-    #[Pure] public function equalsTo(Name $name): bool
+    public static function validate(mixed $value): StringValue
     {
-        return $this->name === $name->name;
-    }
-
-    #[Pure] public static function create(string|Name $name): Name|InvalidValueObject
-    {
-        if ($name instanceof self) {
-            return $name;
-        }
-
-        $minimumNameLength = 5;
-
-        if (strlen($name) < $minimumNameLength) {
-            return new InvalidValueObject( __CLASS__ . " should be at least $minimumNameLength characters");
-        }
-
-        return new Name($name);
+        return $value
+                |> StringValue::from(...)
+                |> StringValue::minLength(2, "Name cannot be less than 2 characters")
+                |> StringValue::maxLength(150, "Name cannot exceed 150 characters");
     }
 }

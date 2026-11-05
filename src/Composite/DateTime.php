@@ -5,52 +5,61 @@ declare(strict_types=1);
 namespace Yadddl\ValueObject\Composite;
 
 use DateTimeImmutable;
-use JetBrains\PhpStorm\Pure;
-use Yadddl\ValueObject\Error\InvalidValueObject;
+use DateTimeInterface;
+use Yadddl\ValueObject\Error\ErrorsBag;
+use Yadddl\ValueObject\Error\Failable;
+use Yadddl\ValueObject\Error\FailableSuccess;
 
-readonly class DateTime implements \Stringable
+final readonly class DateTime implements Failable, \Stringable
 {
+    use FailableSuccess;
+
     public const SIMPLE = 'Y-m-d H:i:s';
 
-    public function __construct(
+    private function __construct(
         public Date $date,
-        public Time $time
+        public Time $time,
     ) {
     }
 
-    public static function now(): DateTime
+    public static function now(): self
     {
-        return new DateTime(Date::now(), Time::now());
+        return new self(Date::now(), Time::now());
     }
 
-    public static function create(string|\DateTimeInterface|DateTime $value): DateTime|InvalidValueObject
+    public static function create(string|DateTimeInterface|self $value): self|ErrorsBag
     {
         return match (true) {
-            $value instanceof self               => $value,
-            $value instanceof \DateTimeInterface => self::createFromDateTimeInterface($value),
-            default                              => self::createFromString($value)
+            $value instanceof self => $value,
+            $value instanceof DateTimeInterface => self::createFromDateTimeInterface($value),
+            default => self::createFromString($value),
         };
     }
 
-    public static function createFromDateTimeInterface(\DateTimeInterface $dateTime): DateTime
+    public static function createFromDateAndTime(Date $date, Time $time): self
     {
-        $date = Date::createFromDateTimeInterface($dateTime);
-        $time = Time::createFromDateTimeInterface($dateTime);
-
-        return new DateTime($date, $time);
+        return new self($date, $time);
     }
 
-    public static function createFromString(string $dateTimeString): DateTime|InvalidValueObject
+    public static function createFromDateTimeInterface(DateTimeInterface $dateTime): self
+    {
+        return new self(
+            Date::createFromDateTimeInterface($dateTime),
+            Time::createFromDateTimeInterface($dateTime),
+        );
+    }
+
+    public static function createFromString(string $dateTimeString): self|ErrorsBag
     {
         return self::createFromFormat($dateTimeString, self::SIMPLE);
     }
 
-    public static function createFromFormat(string $dateTimeString, string $format): DateTime|InvalidValueObject
+    public static function createFromFormat(string $dateTimeString, string $format): self|ErrorsBag
     {
-        $dateTime = DateTimeImmutable::createFromFormat($format, $dateTimeString);
+        $dateTime = DateTimeImmutable::createFromFormat('!'.$format, $dateTimeString);
 
-        if ($dateTime === false) {
-            return new InvalidValueObject("Invalid date time '{$dateTimeString}' provided for the format '{$format}'");
+        if ($dateTime === false || $dateTime->format($format) !== $dateTimeString) {
+            return ErrorsBag::fromMessages("Invalid date time '{$dateTimeString}' provided for the format '{$format}'");
         }
 
         return self::createFromDateTimeInterface($dateTime);
@@ -58,48 +67,34 @@ readonly class DateTime implements \Stringable
 
     public function format(string $format): string
     {
-        /** @var DateTimeImmutable $dateTime */
-        $dateTime = $this->toDateTimeInterface();
-
-        return $dateTime->format($format);
+        return $this->toDateTimeImmutable()->format($format);
     }
 
-    /**
-     * @see toDateTimeImmutable
-     */
-    public function toDateTimeInterface(): \DateTimeInterface
+    public function toDateTimeInterface(): DateTimeInterface
     {
         return $this->toDateTimeImmutable();
     }
 
-    public function toDateTimeImmutable(): \DateTimeImmutable
+    public function toDateTimeImmutable(): DateTimeImmutable
     {
-        $dateTime = (string)$this;
-
-        $result = \DateTimeImmutable::createFromFormat(self::SIMPLE, $dateTime);
-
+        $result = DateTimeImmutable::createFromFormat(self::SIMPLE, (string) $this);
         assert($result !== false);
 
         return $result;
     }
 
-    #[Pure] public function toInt(): int
+    public function toInt(): int
     {
         return $this->date->toInt() + $this->time->toInt();
     }
 
-    #[Pure] public function equalsTo(DateTime $value): bool
+    public function equals(self $other): bool
     {
-        return $this->date->equalsTo($value->date)
-            && $this->time->equalsTo($value->time);
+        return $this->date->equals($other->date) && $this->time->equals($other->time);
     }
 
-    #[Pure] public function toString(): string
-    {
-        return $this->__toString();
-    }
-
-    #[Pure] public function __toString(): string
+    #[\Override]
+    public function __toString(): string
     {
         return "{$this->date} {$this->time}";
     }

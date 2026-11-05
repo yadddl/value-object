@@ -4,40 +4,33 @@ declare(strict_types=1);
 
 namespace Yadddl\ValueObject\Examples;
 
-use Yadddl\ValueObject\Error\InvalidValueObject;
-use JetBrains\PhpStorm\Pure;
+use Yadddl\ValueObject\Contracts\ValidatedValue;
+use Yadddl\ValueObject\Error\ErrorsBag;
+use Yadddl\ValueObject\Error\Failable;
+use Yadddl\ValueObject\Error\FailableSuccess;
+use Yadddl\ValueObject\Validators\IntegerValue;
 
-class Age
+final readonly class Age implements Failable, ValidatedValue
 {
-    private int $age;
-
-    private function __construct(int $age)
+    use FailableSuccess;
+    private function __construct(public int $value)
     {
-        $this->age = $age;
     }
 
-    public function __toString(): string
+    public static function create(mixed $value): Age|ErrorsBag
     {
-        return (string)$this->age;
+        $context = self::validate($value);
+
+        return $context->isValid()
+            ? new self($context->getValue())
+            : $context->getErrors();
     }
 
-    #[Pure] public function equalsTo(Age $age): bool
+    public static function validate(int $value): IntegerValue
     {
-        return $this->age === $age->age;
-    }
-
-    #[Pure] public static function create(int|Age $age): Age|InvalidValueObject
-    {
-        if ($age instanceof self) {
-            return $age;
-        }
-
-        $minimumAge = 18;
-
-        if ($age < $minimumAge) {
-            return new InvalidValueObject( "The age should be at least $minimumAge");
-        }
-
-        return new Age($age);
+        return $value
+            |> IntegerValue::from(...)
+            |> IntegerValue::min(0, "Age cannot be negative")
+            |> IntegerValue::max(150, "Age cannot exceed 150");
     }
 }
