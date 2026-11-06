@@ -171,10 +171,6 @@ readonly class MultipleValidationContext
 
     private function matchesNamedType(mixed $value, ReflectionNamedType $type): bool
     {
-        if ($type->allowsNull() && $value === null) {
-            return true;
-        }
-
         $name = $type->getName();
 
         if ($type->isBuiltin()) {

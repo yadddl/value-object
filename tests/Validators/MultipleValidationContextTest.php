@@ -156,3 +156,70 @@ test('map rejects incompatible parameter type hints', function () {
     expect(fn () => $context->map(fn (SampleAge $name) => true))
         ->toThrow(InvalidArgumentException::class, 'map() parameter "$name" expects');
 });
+
+test('map accepts untyped parameters and Closure::fromCallable', function () {
+    $callback = new class {
+        public function __invoke(SampleName $name): string
+        {
+            return $name->value;
+        }
+    };
+
+    $untyped = MultipleValidationContext::setup(
+        name: SampleName::create('John Doe'),
+    )->map(function ($name) {
+        return $name->value;
+    });
+
+    $invokable = MultipleValidationContext::setup(
+        name: SampleName::create('Jane Doe'),
+    )->map($callback);
+
+    expect($untyped)->toBe('John Doe')
+        ->and($invokable)->toBe('Jane Doe');
+});
+
+test('map accepts union and builtin object/mixed type hints', function () {
+    $unionAndObject = MultipleValidationContext::setup(
+        name: SampleName::create('John Doe'),
+        age: SampleAge::create(30),
+    )->map(function (SampleName|SampleAge $name, object $age) {
+        return [$name, $age];
+    });
+
+    $mixed = MultipleValidationContext::setup(
+        name: SampleName::create('Jane Doe'),
+    )->map(function (mixed $name) {
+        return $name;
+    });
+
+    expect($unionAndObject[0])->toBeInstanceOf(SampleName::class)
+        ->and($unionAndObject[1])->toBeInstanceOf(SampleAge::class)
+        ->and($mixed)->toBeInstanceOf(SampleName::class)
+        ->and($mixed->value)->toBe('Jane Doe');
+});
+
+test('map rejects union type mismatches', function () {
+    $context = MultipleValidationContext::setup(
+        name: SampleName::create('John Doe'),
+    );
+
+    expect(fn () => $context->map(fn (SampleAge|Color $name) => true))
+        ->toThrow(InvalidArgumentException::class, 'map() parameter "$name" type mismatch');
+});
+
+test('map rejects builtin scalar type mismatches', function () {
+    $context = MultipleValidationContext::setup(
+        name: SampleName::create('John Doe'),
+    );
+
+    expect(fn () => $context->map(fn (string $name) => true))
+        ->toThrow(InvalidArgumentException::class, 'map() parameter "$name" expects string');
+});
+
+test('map reports no known fields when setup is empty', function () {
+    $context = MultipleValidationContext::setup();
+
+    expect(fn () => $context->map(fn (SampleName $name) => true))
+        ->toThrow(InvalidArgumentException::class, 'known fields: (none)');
+});

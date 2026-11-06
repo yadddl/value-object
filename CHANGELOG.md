@@ -5,6 +5,13 @@ All notable changes to `yadddl/value-object` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] — 2026-11-06
+
+### Fixed
+
+- Restore 100% coverage for `MultipleValidationContext::map()` type-checking branches (gap already present since `v1.1.2`)
+- Drop unreachable `null` branch in `matchesNamedType()` (`map()` never passes null field objects)
+
 ## [2.0.0] — 2026-11-06
 
 ### Breaking
