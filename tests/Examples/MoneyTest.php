@@ -62,7 +62,7 @@ test('returns errors bag for invalid format', function () {
 
     expect($result)->toBeInstanceOf(ErrorsBag::class)
         ->and($result->hasErrors())->toBeTrue()
-        ->and($result->getErrors()[0]->message)->toContain('Invalid money format');
+        ->and($result->getErrors()[0]->getMessage())->toContain('Invalid money format');
 });
 
 test('returns errors bag for format without currency symbol', function () {
@@ -93,7 +93,7 @@ test('returns errors bag for negative amount in create', function () {
     expect($result)->toBeInstanceOf(ErrorsBag::class)
         ->and($result->hasErrors())->toBeTrue()
         ->and($result->count())->toBe(1)
-        ->and($result->getErrors()[0]->message)->toBe('Amount cannot be negative');
+        ->and($result->getErrors()[0]->getMessage())->toBe('Amount cannot be negative');
 });
 
 test('creates money with zero amount', function () {

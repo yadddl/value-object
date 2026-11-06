@@ -35,11 +35,11 @@ final readonly class ErrorsBag implements Failable
     }
 
     /**
-     * Create an errors bag from error messages
+     * Create an errors bag from messages (as generic {@see InvalidValue} instances)
      */
     public static function fromMessages(string ...$messages): self
     {
-        return new self(array_map(fn ($msg) => new DomainError($msg), $messages));
+        return new self(array_map(static fn (string $msg) => new InvalidValue($msg), $messages));
     }
 
     /**
@@ -60,6 +60,8 @@ final readonly class ErrorsBag implements Failable
 
     /**
      * Get all errors
+     *
+     * @return array<DomainError>
      */
     public function getErrors(): array
     {
@@ -68,10 +70,12 @@ final readonly class ErrorsBag implements Failable
 
     /**
      * Get all error messages
+     *
+     * @return array<string>
      */
     public function getMessages(): array
     {
-        return array_map(fn (DomainError $error) => $error->message, $this->errors);
+        return array_map(static fn (DomainError $error) => $error->getMessage(), $this->errors);
     }
 
     /**
@@ -109,6 +113,6 @@ final readonly class ErrorsBag implements Failable
     #[\Override]
     public function orFail(): never
     {
-        throw new ValidationFailedException($this);
+        throw new ValidationFailedError($this);
     }
 }

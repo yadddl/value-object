@@ -30,7 +30,7 @@ test('returns errors for password too short', function () {
 
     expect($result)->toBeInstanceOf(ErrorsBag::class)
         ->and($result->hasErrors())->toBeTrue()
-        ->and($result->getErrors()[0]->message)->toContain('at least 8 characters');
+        ->and($result->getErrors()[0]->getMessage())->toContain('at least 8 characters');
 });
 
 test('returns errors for password too long', function () {
@@ -39,7 +39,7 @@ test('returns errors for password too long', function () {
     expect($result)->toBeInstanceOf(ErrorsBag::class)
         ->and($result->hasErrors())->toBeTrue();
 
-    $messages = array_map(fn ($e) => $e->message, $result->getErrors());
+    $messages = array_map(fn ($e) => $e->getMessage(), $result->getErrors());
     expect($messages)->toContain('Password cannot exceed 20 characters');
 });
 
@@ -49,7 +49,7 @@ test('returns errors for password without uppercase', function () {
     expect($result)->toBeInstanceOf(ErrorsBag::class)
         ->and($result->hasErrors())->toBeTrue();
 
-    $messages = array_map(fn ($e) => $e->message, $result->getErrors());
+    $messages = array_map(fn ($e) => $e->getMessage(), $result->getErrors());
     expect(implode(' ', $messages))->toContain('uppercase letter');
 });
 
@@ -59,7 +59,7 @@ test('returns errors for password without lowercase', function () {
     expect($result)->toBeInstanceOf(ErrorsBag::class)
         ->and($result->hasErrors())->toBeTrue();
 
-    $messages = array_map(fn ($e) => $e->message, $result->getErrors());
+    $messages = array_map(fn ($e) => $e->getMessage(), $result->getErrors());
     expect(implode(' ', $messages))->toContain('lowercase letter');
 });
 
@@ -69,7 +69,7 @@ test('returns errors for password without number', function () {
     expect($result)->toBeInstanceOf(ErrorsBag::class)
         ->and($result->hasErrors())->toBeTrue();
 
-    $messages = array_map(fn ($e) => $e->message, $result->getErrors());
+    $messages = array_map(fn ($e) => $e->getMessage(), $result->getErrors());
     expect(implode(' ', $messages))->toContain('number');
 });
 
@@ -79,7 +79,7 @@ test('returns errors for password without special character', function () {
     expect($result)->toBeInstanceOf(ErrorsBag::class)
         ->and($result->hasErrors())->toBeTrue();
 
-    $messages = array_map(fn ($e) => $e->message, $result->getErrors());
+    $messages = array_map(fn ($e) => $e->getMessage(), $result->getErrors());
     expect(implode(' ', $messages))->toContain('special character');
 });
 

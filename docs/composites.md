@@ -80,7 +80,7 @@ Helpers:
 - `getErrorsForField('email')`
 - `getFieldsWithErrors()`
 - `getAllMessages()` (flat)
-- `orFail()` — throws `ValidationFailedException` with `[field] message` formatting
+- `orFail()` — throws `ValidationFailedError` with `[field] message` formatting
 
 ## Nested graphs
 

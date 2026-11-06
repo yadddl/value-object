@@ -7,9 +7,10 @@ namespace Yadddl\ValueObject\Error;
 /**
  * Thrown when an error bag is forced through {@see Failable::orFail()}.
  *
- * Maps typically to HTTP 422 — the original bag is available via {@see getErrors()}.
+ * Generic container — not tied to a field or entity. Inspect {@see getErrors()}
+ * for the typed {@see DomainError} instances collected in the bag.
  */
-final class ValidationFailedException extends DomainException
+final class ValidationFailedError extends DomainError
 {
     public function __construct(
         private readonly ErrorsBag|MultipleFieldErrorsBag $errors,

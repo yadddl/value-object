@@ -1,18 +1,20 @@
 <?php
 
-use Yadddl\ValueObject\Error\Error;
-use Yadddl\ValueObject\Error\MultipleFieldErrorsBag;
-use Yadddl\ValueObject\Error\ValidationFailedException;
+declare(strict_types=1);
 
-test('orFail throws ValidationFailedException with field messages', function () {
+use Yadddl\ValueObject\Error\InvalidValue;
+use Yadddl\ValueObject\Error\MultipleFieldErrorsBag;
+use Yadddl\ValueObject\Error\ValidationFailedError;
+
+test('orFail throws ValidationFailedError with field messages', function () {
     $errors = MultipleFieldErrorsBag::fromArray([
-        'email' => [new Error('Invalid email')],
+        'email' => [new InvalidValue('Invalid email')],
     ]);
 
     try {
         $errors->orFail();
         expect(false)->toBeTrue();
-    } catch (ValidationFailedException $exception) {
+    } catch (ValidationFailedError $exception) {
         expect($exception->getMessage())->toBe('[email] Invalid email')
             ->and($exception->getErrors())->toBe($errors);
     }

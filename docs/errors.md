@@ -10,31 +10,36 @@ public static function create(mixed $value): Age|ErrorsBag
 - No monadic API to learn for application code
 - Clear intent at the signature
 
-## Exception hierarchy (boundary throws)
+## Exception hierarchy (domain throws)
 
-Validation still returns bags. When something **throws**, domain failures share a parent so entry points can classify them:
+Validation still returns bags of typed `DomainError` instances. When something **throws**, failures share `DomainError`:
 
 ```text
-\DomainException
-└── Yadddl\ValueObject\Error\DomainException
-    ├── ValidationFailedException   ← orFail() on ErrorsBag / MultipleFieldErrorsBag
-    └── DomainLogicException        ← invariants / illegal state (subclass in your app)
+\RuntimeException
+└── Yadddl\ValueObject\Error\DomainError          (abstract)
+    ├── InvalidField                              (abstract) — field / VO validation
+    │   └── InvalidValue                          (concrete) — generic message-only field error
+    │   └── … project types (e.g. InvalidEmail)
+    ├── InvalidEntity                             (abstract) — entity / aggregate invariants
+    │   └── … project types (e.g. AccountCannotBeApproved)
+    └── ValidationFailedError                     (concrete) — orFail() bag container
 ```
 
 | Type | Typical meaning | Typical HTTP |
 |------|-----------------|--------------|
-| `ValidationFailedException` | Invalid input (bag available via `getErrors()`) | 422 |
-| `DomainLogicException` | Valid values, illegal operation/state | 409 / 422 |
+| `InvalidField` (and subclasses) | Invalid input for a field/VO | 422 |
+| `InvalidEntity` (and subclasses) | Valid values, illegal operation/state | 409 / 422 |
+| `ValidationFailedError` | Multi-error bag forced via `orFail()` (`getErrors()`) | 422 |
 | Other `\Throwable` (DB, bugs, `DeserializationError`, …) | Infra / unexpected | 500 |
 
-`DeserializationError` (serializer) stays infrastructure — not under `DomainException`.
+`DeserializationError` (serializer) stays infrastructure — not under `DomainError`.
 
 ```php
 try {
     $order = $handler->handle($command);
-} catch (ValidationFailedException $e) {
+} catch (ValidationFailedError $e) {
     return new JsonResponse(['errors' => $e->getErrors()], 422);
-} catch (DomainException $e) {
+} catch (DomainError $e) {
     return new JsonResponse(['error' => $e->getMessage()], 409);
 } catch (Throwable $e) {
     throw $e; // or map to 500
@@ -48,19 +53,19 @@ $result = Age::create(-5);
 
 if ($result instanceof ErrorsBag) {
     $result->hasErrors();          // true
-    $result->count();              // number of Error
+    $result->count();              // number of DomainError
     $result->getMessages();        // list<string>
-    $result->getErrors();          // list<Error>
+    $result->getErrors();          // list<DomainError>
     (string) $result;              // "msg1; msg2"
-    $result->orFail();             // never — throws ValidationFailedException
+    $result->orFail();             // never — throws ValidationFailedError
 }
 ```
 
 Factories:
 
 - `ErrorsBag::empty()`
-- `ErrorsBag::fromMessages('a', 'b')`
-- `ErrorsBag::fromError(new Error('…'))`
+- `ErrorsBag::fromMessages('a', 'b')` — wraps each message in `InvalidValue`
+- `ErrorsBag::fromError(new InvalidValue('…'))` — or any `DomainError`
 
 ## `MultipleFieldErrorsBag` (composites)
 
@@ -68,7 +73,7 @@ Factories:
 $result = Person::create('', 'bad', -1);
 
 if ($result instanceof MultipleFieldErrorsBag) {
-    $result->getErrorsByField();     // field => Error[]
+    $result->getErrorsByField();     // field => DomainError[]
     $result->getErrorsForField('age');
     $result->getFieldsWithErrors();  // ['name', 'email', 'age']
     $result->getAllMessages();
@@ -87,15 +92,15 @@ interface Failable
 ```
 
 - On a **successful VO**: `orFail()` returns `$this` (`FailableSuccess` trait)
-- On an **error bag**: `orFail(): never` throws `ValidationFailedException` (a `DomainException`)
+- On an **error bag**: `orFail(): never` throws `ValidationFailedError` (a `DomainError` container)
 
 So this is safe when the union is still un-narrowed:
 
 ```php
-$age = Age::create($input)->orFail(); // Age, or ValidationFailedException
+$age = Age::create($input)->orFail(); // Age, or ValidationFailedError
 ```
 
-Use `orFail()` at **boundaries** (console commands, jobs) where failure should abort. Prefer `instanceof` in HTTP form flows so you can render every message without catching.
+Use `orFail()` at **boundaries** (console commands, jobs) where failure should abort. Prefer `instanceof` in HTTP form flows so you can render every message without catching. Prefer throwing a **project-specific** `InvalidField` / `InvalidEntity` from use cases when a single typed failure is enough.
 
 ## Entry point mapping (recommended)
 

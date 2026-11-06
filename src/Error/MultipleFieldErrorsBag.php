@@ -28,6 +28,8 @@ final readonly class MultipleFieldErrorsBag implements Failable
 
     /**
      * Create from a map of field names to error arrays
+     *
+     * @param array<string, array<DomainError>> $errorsByField
      */
     public static function fromArray(array $errorsByField): self
     {
@@ -87,7 +89,7 @@ final readonly class MultipleFieldErrorsBag implements Failable
     public function getAllMessages(): array
     {
         return array_map(
-            fn (DomainError $error) => $error->message,
+            static fn (DomainError $error) => $error->getMessage(),
             $this->getAllErrors()
         );
     }
@@ -136,7 +138,7 @@ final readonly class MultipleFieldErrorsBag implements Failable
         $messages = [];
         foreach ($this->errorsByField as $field => $errors) {
             foreach ($errors as $error) {
-                $messages[] = "[{$field}] {$error->message}";
+                $messages[] = "[{$field}] {$error->getMessage()}";
             }
         }
         return implode('; ', $messages);
@@ -145,6 +147,6 @@ final readonly class MultipleFieldErrorsBag implements Failable
     #[\Override]
     public function orFail(): never
     {
-        throw new ValidationFailedException($this);
+        throw new ValidationFailedError($this);
     }
 }

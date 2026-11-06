@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Yadddl\ValueObject\Error\Error;
+use Yadddl\ValueObject\Error\InvalidValue;
 use Yadddl\ValueObject\Error\MultipleFieldErrorsBag;
 
 test('empty multiple field bag helpers', function () {
@@ -20,8 +20,8 @@ test('empty multiple field bag helpers', function () {
 
 test('aggregates errors across fields', function () {
     $bag = MultipleFieldErrorsBag::fromArray([
-        'name' => [new Error('too short')],
-        'age' => [new Error('negative'), new Error('too big')],
+        'name' => [new InvalidValue('too short')],
+        'age' => [new InvalidValue('negative'), new InvalidValue('too big')],
     ]);
 
     expect($bag->hasErrors())->toBeTrue()

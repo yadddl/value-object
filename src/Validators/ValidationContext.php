@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Yadddl\ValueObject\Validators;
 
-use Yadddl\ValueObject\Error\DomainError;
 use Yadddl\ValueObject\Error\ErrorsBag;
+use Yadddl\ValueObject\Error\InvalidValue;
 
 /**
  * Validation Context Pattern
@@ -51,7 +51,7 @@ readonly class ValidationContext
         }
 
         $errorObjects = array_map(
-            fn ($message) => new DomainError($message),
+            static fn (string $message) => new InvalidValue($message),
             $this->errors
         );
 
@@ -145,7 +145,7 @@ readonly class ValidationContext
      * Validates array values only if the value is an array, otherwise passes through
      *
      * @param callable $predicate Function that validates the array
-     * @param string $errorMessage DomainError message if validation fails
+     * @param string $errorMessage InvalidValue message if validation fails
      * @return \Closure Closure that takes ValidationContext and returns ValidationContext
      */
     public static function validateArray(callable $predicate, string $errorMessage): \Closure

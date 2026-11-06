@@ -17,7 +17,7 @@ test('returns errors bag for name too short', function () {
 
     expect($result)->toBeInstanceOf(ErrorsBag::class)
         ->and($result->hasErrors())->toBeTrue()
-        ->and($result->getErrors()[0]->message)->toContain('2 characters');
+        ->and($result->getErrors()[0]->getMessage())->toContain('2 characters');
 });
 
 test('returns errors bag for name too long', function () {
@@ -26,7 +26,7 @@ test('returns errors bag for name too long', function () {
 
     expect($result)->toBeInstanceOf(ErrorsBag::class)
         ->and($result->hasErrors())->toBeTrue()
-        ->and($result->getErrors()[0]->message)->toContain('150 characters');
+        ->and($result->getErrors()[0]->getMessage())->toContain('150 characters');
 });
 
 test('validates name at minimum length boundary', function () {

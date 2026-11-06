@@ -18,7 +18,7 @@ test('returns errors bag for negative age', function () {
     expect($result)->toBeInstanceOf(ErrorsBag::class)
         ->and($result->hasErrors())->toBeTrue()
         ->and($result->count())->toBe(1)
-        ->and($result->getErrors()[0]->message)->toBe('Age cannot be negative');
+        ->and($result->getErrors()[0]->getMessage())->toBe('Age cannot be negative');
 });
 
 test('returns errors bag for age exceeding maximum', function () {
@@ -27,7 +27,7 @@ test('returns errors bag for age exceeding maximum', function () {
     expect($result)->toBeInstanceOf(ErrorsBag::class)
         ->and($result->hasErrors())->toBeTrue()
         ->and($result->count())->toBe(1)
-        ->and($result->getErrors()[0]->message)->toBe('Age cannot exceed 150');
+        ->and($result->getErrors()[0]->getMessage())->toBe('Age cannot exceed 150');
 });
 
 test('validates age at minimum boundary', function () {

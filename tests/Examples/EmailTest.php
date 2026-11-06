@@ -17,7 +17,7 @@ test('returns errors bag for invalid email format', function () {
 
     expect($result)->toBeInstanceOf(ErrorsBag::class)
         ->and($result->hasErrors())->toBeTrue()
-        ->and($result->getErrors()[0]->message)->toContain('email');
+        ->and($result->getErrors()[0]->getMessage())->toContain('email');
 });
 
 test('validates various email formats', function (string $emailAddress) {
