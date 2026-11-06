@@ -25,14 +25,14 @@ final readonly class Person implements Failable
         string $email,
         int $age,
     ): Person|MultipleFieldErrorsBag {
-        $context = MultipleValidationContext::setup(
+        return MultipleValidationContext::setup(
             name: Name::create($name),
             email: Email::create($email),
             age: Age::create($age),
-        );
-
-        return $context->isValid()
-            ? new Person(...$context->getValues())
-            : $context->getErrors();
+        )->map(static fn (Name $name, Email $email, Age $age): Person => new Person(
+            name: $name->value,
+            email: $email->value,
+            age: $age->value,
+        ));
     }
 }

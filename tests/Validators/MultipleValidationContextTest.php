@@ -89,3 +89,70 @@ test('collects BackedEnumValue errors by field', function () {
         ->and($context->getValues())->not->toHaveKey('color')
         ->and($context->getErrors()->getFieldsWithErrors())->toContain('color');
 });
+
+test('map returns errors without invoking callback when invalid', function () {
+    $called = false;
+
+    $result = MultipleValidationContext::setup(
+        name: SampleName::create(''),
+        age: SampleAge::create(30),
+    )->map(function (SampleName $name, SampleAge $age) use (&$called) {
+        $called = true;
+
+        return 'ok';
+    });
+
+    expect($called)->toBeFalse()
+        ->and($result)->toBeInstanceOf(MultipleFieldErrorsBag::class)
+        ->and($result->getFieldsWithErrors())->toContain('name');
+});
+
+test('map passes typed VO and enum objects by parameter name', function () {
+    $result = MultipleValidationContext::setup(
+        name: SampleName::create('John Doe'),
+        age: SampleAge::create(30),
+        color: BackedEnumValue::create(Color::class, 'blue'),
+    )->map(function (SampleAge $age, Color $color, SampleName $name) {
+        return [
+            'name' => $name,
+            'age' => $age,
+            'color' => $color,
+        ];
+    });
+
+    expect($result['name'])->toBeInstanceOf(SampleName::class)
+        ->and($result['name']->value)->toBe('John Doe')
+        ->and($result['age'])->toBeInstanceOf(SampleAge::class)
+        ->and($result['age']->value)->toBe(30)
+        ->and($result['color'])->toBe(Color::Blue);
+});
+
+test('map allows subset of fields and optional unused parameters', function () {
+    $result = MultipleValidationContext::setup(
+        name: SampleName::create('John Doe'),
+        age: SampleAge::create(30),
+    )->map(function (SampleName $name, ?SampleAge $unused = null) {
+        return $name->value.'|'.($unused === null ? 'skipped' : 'bound');
+    });
+
+    // `$unused` is optional and not a setup field → default null (age is available but not requested by name)
+    expect($result)->toBe('John Doe|skipped');
+});
+
+test('map rejects unknown required parameter names', function () {
+    $context = MultipleValidationContext::setup(
+        name: SampleName::create('John Doe'),
+    );
+
+    expect(fn () => $context->map(fn (SampleName $name, SampleAge $age) => true))
+        ->toThrow(InvalidArgumentException::class, 'map() parameter "$age" does not match a validated field');
+});
+
+test('map rejects incompatible parameter type hints', function () {
+    $context = MultipleValidationContext::setup(
+        name: SampleName::create('John Doe'),
+    );
+
+    expect(fn () => $context->map(fn (SampleAge $name) => true))
+        ->toThrow(InvalidArgumentException::class, 'map() parameter "$name" expects');
+});

@@ -5,6 +5,17 @@ All notable changes to `yadddl/value-object` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] — 2026-11-06
+
+### Added
+
+- `MultipleValidationContext::map(callable): mixed` — on success, invokes the callback with **typed** field objects (`ValidatedValue` instances / `BackedEnum` cases) bound by **parameter name**; on failure, returns `MultipleFieldErrorsBag` without calling the callback
+- Prefer `map()` over `getValues()` when building aggregates/entities (avoids untyped array key access)
+
+### Notes
+
+- `getValues()` remains for BC (unwrapped scalars / enums, spread into primitive constructors)
+
 ## [1.1.0] — 2026-11-05
 
 ### Added
