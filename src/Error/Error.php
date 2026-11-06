@@ -4,18 +4,10 @@ declare(strict_types=1);
 
 namespace Yadddl\ValueObject\Error;
 
-/**
- * Simple error data structure containing only a message
- */
-final readonly class Error
-{
-    public function __construct(
-        public string $message
-    ) {
-    }
+// Composer may autoload this file when code still references Error.
+class_exists(DomainError::class);
 
-    public function __toString(): string
-    {
-        return $this->message;
-    }
-}
+/**
+ * @deprecated Use {@see DomainError} instead.
+ */
+class_alias(DomainError::class, __NAMESPACE__.'\\Error');

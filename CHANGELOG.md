@@ -5,6 +5,17 @@ All notable changes to `yadddl/value-object` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] — 2026-11-06
+
+### Added
+
+- `DomainError` — canonical message VO for validation / invariant bags (prefer over PHP `\Error` / `\Exception` and over the deprecated `Error` alias)
+
+### Changed
+
+- `ErrorsBag` / `MultipleFieldErrorsBag` / `ValidationContext` use `DomainError`
+- `Error` remains a **deprecated class alias** of `DomainError` for BC
+
 ## [1.1.1] — 2026-11-06
 
 ### Added

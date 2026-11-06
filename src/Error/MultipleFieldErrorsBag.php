@@ -11,7 +11,7 @@ namespace Yadddl\ValueObject\Error;
 final readonly class MultipleFieldErrorsBag implements Failable
 {
     /**
-     * @param array<string, array<Error>> $errorsByField Map of field names to their errors
+     * @param array<string, array<DomainError>> $errorsByField Map of field names to their errors
      */
     public function __construct(
         private array $errorsByField
@@ -37,7 +37,7 @@ final readonly class MultipleFieldErrorsBag implements Failable
     /**
      * Get all errors organized by field
      *
-     * @return array<string, array<Error>> Field name => array of errors
+     * @return array<string, array<DomainError>> Field name => array of errors
      */
     public function getErrorsByField(): array
     {
@@ -48,7 +48,7 @@ final readonly class MultipleFieldErrorsBag implements Failable
      * Get errors for a specific field
      *
      * @param string $fieldName The field name
-     * @return array<Error> Errors for the field, or empty array if no errors
+     * @return array<DomainError> Errors for the field, or empty array if no errors
      */
     public function getErrorsForField(string $fieldName): array
     {
@@ -68,7 +68,7 @@ final readonly class MultipleFieldErrorsBag implements Failable
     /**
      * Get all errors as a flat array (loses field information)
      *
-     * @return array<Error> All errors from all fields
+     * @return array<DomainError> All errors from all fields
      */
     public function getAllErrors(): array
     {
@@ -87,7 +87,7 @@ final readonly class MultipleFieldErrorsBag implements Failable
     public function getAllMessages(): array
     {
         return array_map(
-            fn (Error $error) => $error->message,
+            fn (DomainError $error) => $error->message,
             $this->getAllErrors()
         );
     }

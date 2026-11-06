@@ -11,7 +11,7 @@ namespace Yadddl\ValueObject\Error;
 final readonly class ErrorsBag implements Failable
 {
     /**
-     * @param array<Error> $errors List of errors
+     * @param array<DomainError> $errors List of errors
      */
     public function __construct(
         private array $errors
@@ -29,7 +29,7 @@ final readonly class ErrorsBag implements Failable
     /**
      * Create an errors bag from a single error
      */
-    public static function fromError(Error $error): self
+    public static function fromError(DomainError $error): self
     {
         return new self([$error]);
     }
@@ -39,13 +39,13 @@ final readonly class ErrorsBag implements Failable
      */
     public static function fromMessages(string ...$messages): self
     {
-        return new self(array_map(fn ($msg) => new Error($msg), $messages));
+        return new self(array_map(fn ($msg) => new DomainError($msg), $messages));
     }
 
     /**
      * Add an error to the bag
      */
-    public function add(Error $error): self
+    public function add(DomainError $error): self
     {
         return new self([...$this->errors, $error]);
     }
@@ -71,7 +71,7 @@ final readonly class ErrorsBag implements Failable
      */
     public function getMessages(): array
     {
-        return array_map(fn (Error $error) => $error->message, $this->errors);
+        return array_map(fn (DomainError $error) => $error->message, $this->errors);
     }
 
     /**
