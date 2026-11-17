@@ -46,7 +46,7 @@ Every type below:
 | [NotEmptyText](#notemptytext) | `string` | Non-empty (`/.+/`) | Same as Text | Yes | Inherits Text helpers |
 | [Email](#email) | `string` | Valid email (`FILTER_VALIDATE_EMAIL`) | Prefer a custom VO if you need extra rules | Yes | `equals()`, `__toString()` |
 | [Url](#url) | `string` | Valid URL (`FILTER_VALIDATE_URL`) | Prefer a custom VO for scheme/host rules | Yes | `equals()`, `__toString()` |
-| [Uuid](#uuid) | `string` | Valid UUID via [ramsey/uuid](https://github.com/ramsey/uuid); stored lowercase | Prefer a custom VO for version/variant constraints | Yes | `generate()`, `fromRamsey()`, `toRamsey()`, `equals()`, `__toString()` |
+| [Uuid](#uuid) | `string` | Valid UUID via [ramsey/uuid](https://github.com/ramsey/uuid); stored lowercase | Subclass + override `mapFailures()` for named domain ids | Yes | `new()`, `generate()`, `fromRamsey()`, `toRamsey()`, `equals()`, `__toString()` |
 | [Integer](#integer) | `int` | Full `PHP_INT_MIN` … `PHP_INT_MAX` range | Override `MIN` / `MAX` | Yes | `equals()`, `__toString()` |
 | [PositiveInteger](#positiveinteger) | `int` | `MIN = 0`, `MAX = PHP_INT_MAX` | Same as Integer | Yes | Inherits Integer helpers |
 | [StrictlyPositiveInteger](#strictlypositiveinteger) | `int` | `MIN = 1`, `MAX = PHP_INT_MAX` | Same as Integer | Yes | Inherits Integer helpers |
@@ -139,22 +139,42 @@ Url::create('not-a-url');                // ErrorsBag
 
 ### Uuid
 
-UUID string VO backed by [ramsey/uuid](https://github.com/ramsey/uuid). Values are stored **lowercase**.
+UUID string VO backed by [ramsey/uuid](https://github.com/ramsey/uuid). Values are stored **lowercase**. Subclass for named domain ids (`OrderId`, `ListingId`) and override `mapFailures()` for typed errors.
 
 | | |
 |--|--|
-| Create | `Uuid::create(mixed $value): Uuid\|ErrorsBag` |
-| Generate | `Uuid::generate(): Uuid` (random v4) |
-| Ramsey | `Uuid::fromRamsey(UuidInterface): Uuid`, `$uuid->toRamsey(): UuidInterface` |
+| Create | `Uuid::create(mixed $value): static\|ErrorsBag` |
+| Generate | `Uuid::new(): static` / `Uuid::generate(): static` (random v4) |
+| Ramsey | `Uuid::fromRamsey(UuidInterface): static`, `$uuid->toRamsey(): UuidInterface` |
+| Errors | Override `mapFailures(ErrorsBag): ErrorsBag` in subclasses |
 
 ```php
+use Yadddl\ValueObject\Error\ErrorsBag;
+use Yadddl\ValueObject\Error\InvalidEntity;
 use Yadddl\ValueObject\Primitive\Uuid;
 
 $uuid = Uuid::create('550E8400-E29B-41D4-A716-446655440000')->orFail();
 $uuid->value; // "550e8400-e29b-41d4-a716-446655440000"
+$fresh = Uuid::new();
 
-$fresh = Uuid::generate();
-$ramsey = $fresh->toRamsey();
+final class InvalidOrderId extends InvalidEntity
+{
+    public static function invalid(): self
+    {
+        return new self('Invalid order id');
+    }
+}
+
+final readonly class OrderId extends Uuid
+{
+    protected static function mapFailures(ErrorsBag $errors): ErrorsBag
+    {
+        return ErrorsBag::fromError(InvalidOrderId::invalid());
+    }
+}
+
+$id = OrderId::new();
+$parsed = OrderId::create($fromRoute)->orFail();
 ```
 
 ### Custom text types
@@ -387,7 +407,8 @@ Details: [serializer.md](serializer.md).
 | Free-form non-empty string | `NotEmptyText` or `Text` |
 | Email address | `Email` |
 | HTTP(S) / absolute URL | `Url` |
-| Identifier UUID | `Uuid` (`generate()` for new ids) |
+| Bare UUID scalar | `Uuid` (`new()` / `generate()`) |
+| Named domain id | Subclass `Uuid` (`new()`, optional `mapFailures()`) |
 | Domain-specific string format | Subclass `Text` + `REGEX` |
 | Any int in PHP range | `Integer` |
 | Non-negative count / amount (zero ok) | `PositiveInteger` |

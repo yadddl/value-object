@@ -74,7 +74,7 @@ use Yadddl\ValueObject\Primitive\Uuid;
 
 $email = Email::create('user@example.com');
 $url = Url::create('https://example.com');
-$id = Uuid::generate();
+$id = Uuid::new(); // or Uuid::generate(); subclass Uuid for named domain ids
 $qty = StrictlyPositiveInteger::create(3);
 $name = NotEmptyText::create('Ada');
 ```

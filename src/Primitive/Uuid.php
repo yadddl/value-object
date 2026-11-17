@@ -13,21 +13,38 @@ use Yadddl\ValueObject\Error\FailableSuccess;
 use Yadddl\ValueObject\Validators\StringValue;
 use Yadddl\ValueObject\Validators\ValidationContext;
 
-final readonly class Uuid implements Failable, ValidatedValue, \Stringable
+/**
+ * UUID string VO. Subclass for named domain ids (OrderId, ListingId, …)
+ * and override {@see mapFailures()} for typed errors.
+ *
+ * @example
+ * final readonly class OrderId extends Uuid
+ * {
+ *     protected static function mapFailures(ErrorsBag $errors): ErrorsBag
+ *     {
+ *         return ErrorsBag::fromError(InvalidOrderId::invalid());
+ *     }
+ * }
+ *
+ * $id = OrderId::new();
+ */
+readonly class Uuid implements Failable, ValidatedValue, \Stringable
 {
     use FailableSuccess;
 
-    private function __construct(public string $value)
+    final private function __construct(public string $value)
     {
     }
 
-    public static function create(mixed $value): self|ErrorsBag
+    public static function create(mixed $value): static|ErrorsBag
     {
-        $context = self::validate($value);
+        $context = static::validate($value);
 
-        return $context->isValid()
-            ? new self(strtolower($context->getValue()))
-            : $context->getErrors();
+        if (! $context->isValid()) {
+            return static::mapFailures($context->getErrors());
+        }
+
+        return new static(strtolower($context->getValue()));
     }
 
     public static function validate(mixed $value): ValidationContext
@@ -38,16 +55,32 @@ final readonly class Uuid implements Failable, ValidatedValue, \Stringable
     }
 
     /**
-     * Generate a new random UUID (v4) via ramsey/uuid.
+     * Fresh random UUID (v4). Alias of {@see generate()} for identity-style call sites.
      */
-    public static function generate(): self
+    public static function new(): static
     {
-        return new self(RamseyUuid::uuid4()->toString());
+        return static::generate();
     }
 
-    public static function fromRamsey(UuidInterface $uuid): self
+    /**
+     * Generate a new random UUID (v4) via ramsey/uuid.
+     */
+    public static function generate(): static
     {
-        return new self(strtolower($uuid->toString()));
+        return new static(RamseyUuid::uuid4()->toString());
+    }
+
+    public static function fromRamsey(UuidInterface $uuid): static
+    {
+        return new static(strtolower($uuid->toString()));
+    }
+
+    /**
+     * Replace library {@see \Yadddl\ValueObject\Error\InvalidValue} bags with domain errors.
+     */
+    protected static function mapFailures(ErrorsBag $errors): ErrorsBag
+    {
+        return $errors;
     }
 
     public function toRamsey(): UuidInterface
@@ -57,7 +90,7 @@ final readonly class Uuid implements Failable, ValidatedValue, \Stringable
 
     public function equals(self $other): bool
     {
-        return $other->value === $this->value;
+        return $other instanceof static && $other->value === $this->value;
     }
 
     #[\Override]
@@ -71,7 +104,7 @@ final readonly class Uuid implements Failable, ValidatedValue, \Stringable
         $message = $errorMessage ?? 'Invalid UUID format';
 
         return static function (ValidationContext $context) use ($message) {
-            if (!is_string($context->getValue())) {
+            if (! is_string($context->getValue())) {
                 return $context;
             }
 
