@@ -102,9 +102,12 @@ readonly class MultipleValidationContext
      *
      * @template T
      *
-     * @param callable(): T $callback
+     * @param callable $callback Receives named validated field objects; arity is reflective
      *
      * @return T|MultipleFieldErrorsBag
+     *
+     * @psalm-param callable(mixed...):T $callback
+     * @psalm-return T|MultipleFieldErrorsBag
      */
     public function map(callable $callback): mixed
     {
@@ -136,6 +139,7 @@ readonly class MultipleValidationContext
             $namedArgs[$name] = $value;
         }
 
+        /** @var T */
         return $closure(...$namedArgs);
     }
 

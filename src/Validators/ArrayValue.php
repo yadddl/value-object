@@ -66,10 +66,10 @@ readonly class ArrayValue extends ValidationContext
      * @return \Closure Closure that takes ValidationContext and returns ValidationContext
      */
     #[\Override]
-    public static function validateArray(callable $predicate, string $errorMessage): \Closure
+    public static function validateArray(callable $predicate, string $errorMessage, string $code = 'invalid'): \Closure
     {
         return static fn (ValidationContext $context) => is_array($context->getValue())
-            ? $context->validate($predicate, $errorMessage)
+            ? $context->validate($predicate, $errorMessage, $code)
             : $context;
     }
 }

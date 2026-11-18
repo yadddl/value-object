@@ -2,7 +2,7 @@
   "name": "yadddl/value-object",
   "description": "Yet another Value Object library — functional validation (PHP 8.5 pipes) and structural serialize/deserialize",
   "type": "library",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "minimum-stability": "stable",
   "license": "MIT",
   "authors": [

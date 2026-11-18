@@ -23,7 +23,7 @@ final readonly class Url implements Failable, ValidatedValue, \Stringable
         $context = self::validate($value);
 
         return $context->isValid()
-            ? new self($context->getValue())
+            ? new self($context->stringValue())
             : $context->getErrors();
     }
 

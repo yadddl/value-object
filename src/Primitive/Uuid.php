@@ -47,10 +47,10 @@ readonly class Uuid implements Failable, ValidatedValue, \Stringable
             return static::mapFailures(static::failuresFrom($context));
         }
 
-        return new static(strtolower($context->getValue()));
+        return new static(strtolower($context->stringValue()));
     }
 
-    public static function validate(mixed $value): ValidationContext
+    public static function validate(mixed $value): StringValue
     {
         return $value
             |> StringValue::from(...)
@@ -102,11 +102,16 @@ readonly class Uuid implements Failable, ValidatedValue, \Stringable
         return $this->value;
     }
 
+    /**
+     * @return \Closure(ValidationContext):StringValue
+     */
     private static function isUuid(?string $errorMessage = null): \Closure
     {
         $message = $errorMessage ?? 'Invalid UUID format';
 
-        return static function (ValidationContext $context) use ($message) {
+        return static function (ValidationContext $context) use ($message): StringValue {
+            $context = StringValue::ensure($context);
+
             if (! is_string($context->getValue())) {
                 return $context;
             }

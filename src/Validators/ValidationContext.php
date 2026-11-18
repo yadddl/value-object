@@ -19,7 +19,7 @@ readonly class ValidationContext
      * @param mixed $value The value being validated
      * @param list<array{code: string, message: string}> $failures
      */
-    private function __construct(
+    protected function __construct(
         private mixed $value,
         private array $failures
     ) {
@@ -28,9 +28,17 @@ readonly class ValidationContext
     /**
      * Create a new validation context for a value
      */
-    protected static function of(mixed $value): self
+    protected static function of(mixed $value): static
     {
         return new static($value, []);
+    }
+
+    /**
+     * Re-wrap another context's value + failures as this class (keeps pipe steps typed).
+     */
+    protected static function rewrap(ValidationContext $context): static
+    {
+        return new static($context->getValue(), $context->getFailures());
     }
 
     /**
@@ -87,7 +95,7 @@ readonly class ValidationContext
     /**
      * Add an error to the context
      */
-    public function addError(string $error, string $code = 'invalid'): self
+    public function addError(string $error, string $code = 'invalid'): static
     {
         return new static($this->value, [...$this->failures, [
             'code' => $code,
@@ -100,7 +108,7 @@ readonly class ValidationContext
      * If validation fails, adds the error message to the context
      * Returns the context (for pipe chaining)
      */
-    public function validate(callable $predicate, string $errorMessage, string $code = 'invalid'): self
+    public function validate(callable $predicate, string $errorMessage, string $code = 'invalid'): static
     {
         $isValid = $predicate($this->value);
 

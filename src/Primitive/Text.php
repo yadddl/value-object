@@ -27,7 +27,7 @@ readonly class Text implements Failable, ValidatedValue, \Stringable
         $context = static::validate($value);
 
         return $context->isValid()
-            ? new static($context->getValue())
+            ? new static($context->stringValue())
             : static::failuresFrom($context);
     }
 

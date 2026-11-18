@@ -31,12 +31,12 @@ final readonly class TimeZone implements Failable, ValidatedValue, \Stringable
         }
 
         /** @var non-empty-string $identifier */
-        $identifier = $context->getValue();
+        $identifier = $context->stringValue();
 
         return new self($identifier);
     }
 
-    public static function validate(mixed $value): ValidationContext
+    public static function validate(mixed $value): StringValue
     {
         return $value
             |> StringValue::from(...)
@@ -73,11 +73,16 @@ final readonly class TimeZone implements Failable, ValidatedValue, \Stringable
         return $this->value;
     }
 
+    /**
+     * @return \Closure(ValidationContext):StringValue
+     */
     private static function isTimeZone(?string $errorMessage = null): \Closure
     {
         $message = $errorMessage ?? 'Invalid timezone identifier';
 
-        return static function (ValidationContext $context) use ($message) {
+        return static function (ValidationContext $context) use ($message): StringValue {
+            $context = StringValue::ensure($context);
+
             if (!is_string($context->getValue())) {
                 return $context;
             }

@@ -5,6 +5,19 @@ All notable changes to `yadddl/value-object` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.1] — 2026-11-18
+
+### Added
+
+- `StringValue::stringValue()` / `IntegerValue::intValue()` for typed extraction after a valid chain
+- `StringValue::ensure()` / `IntegerValue::ensure()` to keep concrete context types across custom pipe steps
+
+### Fixed
+
+- `MultipleValidationContext::map()` Psalm signature accepted zero-arg `callable(): T` only; now documents variadic named-field callbacks
+- `StringValue` / `IntegerValue` step closures return their concrete type so PHP 8.5 `|>` chains stay typed under Psalm 7
+- `StringValue::from()` / `IntegerValue::from()` always return their concrete context type (failed `isString`/`isInteger` no longer widens to bare `ValidationContext`)
+
 ## [2.2.0] — 2026-11-18
 
 ### Added

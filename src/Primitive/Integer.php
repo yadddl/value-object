@@ -27,7 +27,7 @@ readonly class Integer implements Failable, ValidatedValue, \Stringable
         $context = static::validate($value);
 
         return $context->isValid()
-            ? new static($context->getValue())
+            ? new static($context->intValue())
             : static::failuresFrom($context);
     }
 
