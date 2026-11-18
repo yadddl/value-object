@@ -13,6 +13,7 @@ use Yadddl\ValueObject\Validators\IntegerValue;
 readonly class Integer implements Failable, ValidatedValue, \Stringable
 {
     use FailableSuccess;
+    use LabeledPrimitive;
 
     protected const MIN = \PHP_INT_MIN;
     protected const MAX = \PHP_INT_MAX;
@@ -27,15 +28,17 @@ readonly class Integer implements Failable, ValidatedValue, \Stringable
 
         return $context->isValid()
             ? new static($context->getValue())
-            : $context->getErrors();
+            : static::failuresFrom($context);
     }
 
     public static function validate(mixed $value): IntegerValue
     {
+        $label = static::label();
+
         return $value
             |> IntegerValue::from(...)
-            |> IntegerValue::min(static::MIN, sprintf('Value must be at least %d', static::MIN))
-            |> IntegerValue::max(static::MAX, sprintf('Value must be at most %d', static::MAX));
+            |> IntegerValue::min(static::MIN, sprintf('%s must be at least %d', $label, static::MIN))
+            |> IntegerValue::max(static::MAX, sprintf('%s must be at most %d', $label, static::MAX));
     }
 
     public function equals(self $other): bool

@@ -20,7 +20,8 @@ readonly class IntegerValue extends ValidationContext
 
             $newContext = $context->validate(
                 fn (mixed $value) => is_int($value),
-                $message
+                $message,
+                'invalid_type',
             );
 
             return ($newContext->isValid())
@@ -40,7 +41,8 @@ readonly class IntegerValue extends ValidationContext
 
             return $context->validate(
                 fn (int $value) => $value >= $min,
-                $message
+                $message,
+                'too_small',
             );
         };
     }
@@ -56,7 +58,8 @@ readonly class IntegerValue extends ValidationContext
 
             return $context->validate(
                 fn (int $value) => $value <= $max,
-                $message
+                $message,
+                'too_large',
             );
         };
     }
@@ -75,7 +78,8 @@ readonly class IntegerValue extends ValidationContext
 
             return $context->validate(
                 fn (int $value) => $value >= $min && $value <= $max,
-                $message
+                $message,
+                'out_of_range',
             );
         };
     }

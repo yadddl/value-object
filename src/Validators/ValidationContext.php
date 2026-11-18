@@ -10,18 +10,18 @@ use Yadddl\ValueObject\Error\InvalidValue;
 /**
  * Validation Context Pattern
  *
- * Holds a value being validated and accumulates errors as validations run.
- * Can be passed through PHP 8.5 pipes for elegant functional validation.
+ * Holds a value being validated and accumulates failures (code + message)
+ * as validations run. Can be passed through PHP 8.5 pipes.
  */
 readonly class ValidationContext
 {
     /**
      * @param mixed $value The value being validated
-     * @param array<string> $errors Accumulated error messages
+     * @param list<array{code: string, message: string}> $failures
      */
     private function __construct(
         private mixed $value,
-        private array $errors
+        private array $failures
     ) {
     }
 
@@ -42,20 +42,30 @@ readonly class ValidationContext
     }
 
     /**
-     * Get all accumulated errors as ErrorsBag
+     * Get all accumulated errors as ErrorsBag (generic {@see InvalidValue}).
      */
     public function getErrors(): ErrorsBag
     {
-        if (empty($this->errors)) {
+        if ($this->failures === []) {
             return ErrorsBag::empty();
         }
 
         $errorObjects = array_map(
-            static fn (string $message) => new InvalidValue($message),
-            $this->errors
+            static fn (array $failure) => new InvalidValue($failure['message']),
+            $this->failures
         );
 
         return new ErrorsBag($errorObjects);
+    }
+
+    /**
+     * Structured failures for domain mapping via codes.
+     *
+     * @return list<array{code: string, message: string}>
+     */
+    public function getFailures(): array
+    {
+        return $this->failures;
     }
 
     /**
@@ -63,7 +73,7 @@ readonly class ValidationContext
      */
     public function hasErrors(): bool
     {
-        return !empty($this->errors);
+        return $this->failures !== [];
     }
 
     /**
@@ -71,15 +81,18 @@ readonly class ValidationContext
      */
     public function isValid(): bool
     {
-        return !$this->hasErrors();
+        return ! $this->hasErrors();
     }
 
     /**
      * Add an error to the context
      */
-    public function addError(string $error): self
+    public function addError(string $error, string $code = 'invalid'): self
     {
-        return new static($this->value, [...$this->errors, $error]);
+        return new static($this->value, [...$this->failures, [
+            'code' => $code,
+            'message' => $error,
+        ]]);
     }
 
     /**
@@ -87,12 +100,12 @@ readonly class ValidationContext
      * If validation fails, adds the error message to the context
      * Returns the context (for pipe chaining)
      */
-    public function validate(callable $predicate, string $errorMessage): self
+    public function validate(callable $predicate, string $errorMessage, string $code = 'invalid'): self
     {
         $isValid = $predicate($this->value);
 
-        if (!$isValid) {
-            return $this->addError($errorMessage);
+        if (! $isValid) {
+            return $this->addError($errorMessage, $code);
         }
 
         return $this;
@@ -110,7 +123,7 @@ readonly class ValidationContext
             return $this;
         }
 
-        return new static($mapper($this->value), $this->errors);
+        return new static($mapper($this->value), $this->failures);
     }
 
     /**
@@ -148,11 +161,11 @@ readonly class ValidationContext
      * @param string $errorMessage InvalidValue message if validation fails
      * @return \Closure Closure that takes ValidationContext and returns ValidationContext
      */
-    public static function validateArray(callable $predicate, string $errorMessage): \Closure
+    public static function validateArray(callable $predicate, string $errorMessage, string $code = 'invalid'): \Closure
     {
         return static fn (ValidationContext $context) =>
             is_array($context->getValue())
-                ? $context->validate($predicate, $errorMessage)
+                ? $context->validate($predicate, $errorMessage, $code)
                 : $context;
     }
 

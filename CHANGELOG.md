@@ -5,6 +5,19 @@ All notable changes to `yadddl/value-object` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] — 2026-11-18
+
+### Added
+
+- `LabeledPrimitive` trait: optional `LABEL` (empty → short class name) for personalized validation messages
+- `domainError(string $code, string $message)` hook on Integer/Text/Uuid for typed domain failures
+- Structured validation failure codes on `ValidationContext` (`too_small`, `too_large`, `empty`, `invalid_format`, …)
+
+### Changed
+
+- `Integer` / `Text` / `Uuid` `create()` map failures through `domainError()` instead of raw `InvalidValue` bags only
+- Default min/max messages use the VO label (`Price must be at least 1`)
+
 ## [2.1.0] — 2026-11-18
 
 ### Changed

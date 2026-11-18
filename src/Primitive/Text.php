@@ -13,6 +13,7 @@ use Yadddl\ValueObject\Validators\StringValue;
 readonly class Text implements Failable, ValidatedValue, \Stringable
 {
     use FailableSuccess;
+    use LabeledPrimitive;
 
     /** @var non-empty-string */
     protected const REGEX = '/(.+)/';
@@ -27,17 +28,21 @@ readonly class Text implements Failable, ValidatedValue, \Stringable
 
         return $context->isValid()
             ? new static($context->getValue())
-            : $context->getErrors();
+            : static::failuresFrom($context);
     }
 
     public static function validate(mixed $value): StringValue
     {
         /** @var non-empty-string $regex */
         $regex = static::REGEX;
+        $label = static::label();
 
         return $value
             |> StringValue::from(...)
-            |> StringValue::matches($regex, sprintf("Invalid string: value does not match '%s'", $regex));
+            |> StringValue::matches(
+                $regex,
+                sprintf("%s is invalid: value does not match '%s'", $label, $regex),
+            );
     }
 
     public function toUpperCase(): static

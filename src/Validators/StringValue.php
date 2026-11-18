@@ -20,7 +20,8 @@ readonly class StringValue extends ValidationContext
 
             $newContext = $context->validate(
                 fn (mixed $value) => is_string($value),
-                $message
+                $message,
+                'invalid_type',
             );
 
             return ($newContext->isValid())
@@ -37,6 +38,7 @@ readonly class StringValue extends ValidationContext
             $context,
             fn (string $value) => !empty($value),
             $message,
+            'empty',
         );
     }
 
@@ -48,6 +50,7 @@ readonly class StringValue extends ValidationContext
             $context,
             fn (string $value) => strlen($value) >= $min,
             $message,
+            'too_small',
         );
     }
 
@@ -59,6 +62,7 @@ readonly class StringValue extends ValidationContext
             $context,
             fn (string $value) => strlen($value) <= $max,
             $message,
+            'too_large',
         );
     }
 
@@ -70,6 +74,7 @@ readonly class StringValue extends ValidationContext
             $context,
             fn (string $value) => filter_var($value, FILTER_VALIDATE_EMAIL) !== false,
             $message,
+            'invalid_format',
         );
     }
 
@@ -81,6 +86,7 @@ readonly class StringValue extends ValidationContext
             $context,
             fn (string $value) => filter_var($value, FILTER_VALIDATE_URL) !== false,
             $message,
+            'invalid_format',
         );
     }
 
@@ -92,6 +98,7 @@ readonly class StringValue extends ValidationContext
             $context,
             fn (string $value) => preg_match('/[A-Z]/', $value) === 1,
             $message,
+            'invalid_format',
         );
     }
 
@@ -103,6 +110,7 @@ readonly class StringValue extends ValidationContext
             $context,
             fn (string $value) => preg_match('/[a-z]/', $value) === 1,
             $message,
+            'invalid_format',
         );
     }
 
@@ -114,6 +122,7 @@ readonly class StringValue extends ValidationContext
             $context,
             fn (string $value) => preg_match('/[0-9]/', $value) === 1,
             $message,
+            'invalid_format',
         );
     }
 
@@ -125,6 +134,7 @@ readonly class StringValue extends ValidationContext
             $context,
             fn (string $value) => preg_match('/[^a-zA-Z0-9]/', $value) === 1,
             $message,
+            'invalid_format',
         );
     }
 
@@ -156,6 +166,7 @@ readonly class StringValue extends ValidationContext
             return $context->validate(
                 static fn (string $value): bool => $pattern !== '' && preg_match($pattern, $value) === 1,
                 $message,
+                'invalid_format',
             );
         };
     }
@@ -178,7 +189,7 @@ readonly class StringValue extends ValidationContext
             $isValid = $pattern !== '' && preg_match($pattern, $value, $matches) === 1;
 
             if (!$isValid) {
-                return $context->addError($message);
+                return $context->addError($message, 'invalid_format');
             }
 
             return $context->applyMap(fn () => $matches);
@@ -189,11 +200,12 @@ readonly class StringValue extends ValidationContext
         ValidationContext $context,
         callable $predicate,
         string $errorMessage,
+        string $code = 'invalid',
     ): ValidationContext {
         if (!is_string($context->getValue())) {
             return $context;
         }
 
-        return $context->validate($predicate, $errorMessage);
+        return $context->validate($predicate, $errorMessage, $code);
     }
 }

@@ -14,15 +14,17 @@ use Yadddl\ValueObject\Validators\StringValue;
 use Yadddl\ValueObject\Validators\ValidationContext;
 
 /**
- * UUID string VO. Subclass for named domain ids (OrderId, ListingId, …)
- * and override {@see mapFailures()} for typed errors.
+ * UUID string VO. Subclass for named domain ids (OrderId, ListingId, …).
+ *
+ * Prefer overriding {@see domainError()} for typed errors; {@see mapFailures()}
+ * remains for bag-level remapping.
  *
  * @example
  * final readonly class OrderId extends Uuid
  * {
- *     protected static function mapFailures(ErrorsBag $errors): ErrorsBag
+ *     protected static function domainError(string $code, string $message): DomainError
  *     {
- *         return ErrorsBag::fromError(InvalidOrderId::invalid());
+ *         return InvalidOrderId::invalid();
  *     }
  * }
  *
@@ -31,6 +33,7 @@ use Yadddl\ValueObject\Validators\ValidationContext;
 readonly class Uuid implements Failable, ValidatedValue, \Stringable
 {
     use FailableSuccess;
+    use LabeledPrimitive;
 
     final private function __construct(public string $value)
     {
@@ -41,7 +44,7 @@ readonly class Uuid implements Failable, ValidatedValue, \Stringable
         $context = static::validate($value);
 
         if (! $context->isValid()) {
-            return static::mapFailures($context->getErrors());
+            return static::mapFailures(static::failuresFrom($context));
         }
 
         return new static(strtolower($context->getValue()));
@@ -51,7 +54,7 @@ readonly class Uuid implements Failable, ValidatedValue, \Stringable
     {
         return $value
             |> StringValue::from(...)
-            |> self::isUuid('Invalid UUID format');
+            |> self::isUuid(sprintf('%s is not a valid UUID', static::label()));
     }
 
     /**
@@ -76,7 +79,7 @@ readonly class Uuid implements Failable, ValidatedValue, \Stringable
     }
 
     /**
-     * Replace library {@see \Yadddl\ValueObject\Error\InvalidValue} bags with domain errors.
+     * Replace library bags with domain errors (bag-level). Prefer {@see domainError()}.
      */
     protected static function mapFailures(ErrorsBag $errors): ErrorsBag
     {
@@ -111,6 +114,7 @@ readonly class Uuid implements Failable, ValidatedValue, \Stringable
             return $context->validate(
                 static fn (string $value): bool => RamseyUuid::isValid($value),
                 $message,
+                'invalid_format',
             );
         };
     }
